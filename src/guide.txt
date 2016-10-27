@@ -1,0 +1,74 @@
+*****************************************
+提醒：有含义的预留关键词有
+int if else for break while do \r\n \t printf return
++ - * / ++ --
+> < = == >= <= !=
+, ; "" '' ( ) // /* */ /.../ { }
+_____##@@...
+
+
+1.程序大概运行流程：
+--------------------控制权交给主框架
+杀死注释(这不会当场去除空行，只是挖掉注释的文本，由框架直接完成)和\t[注释有行内的/apple/]以及套在双引号内的一切文本
+完成变量名字的替换(如_____##@@4分配虚拟内存时位于memory[4]){啊啊啊好难}
+分配并初始化虚拟内存
+填充statement类，构建deque，向statement类中写入行号,cmdType暂时保持S_ERROR
+--------------------控制权交给解析器
+//解析器注意：分为多行的时候一定别忘了把原始行号拷贝到所有新的statement中。
+首先遍历展开for循环和while循环为if()+goto。goto的目标节点(cmdType为S_GOTO_DEST)的行号应设为一个唯一负值，goto语句本身应在text中保存这个唯一负值(用to_string(int)和stoi(string)来进行转换)同时自身的cmdType应为S_GOTO。暂时不用考虑for循环里面会有多行语句。[可以考虑先把for换成while，然后从头重新遍历一遍，把while换成goto+if]
+
+再次遍历，将位于同一行的分号语句变为多行，含有花括号的语句也搞成多行。
+再次遍历，然后所有"int "开头的语句拿来分析，先拿走这个开头，然后按逗号分割成多行，其余的工作下次遍历再做。
+//行数变化产生的遍历问题、iterator失效问题自己解决，这两次遍历可以考虑放在一起，不管。。。，
+
+最后一次遍历，给所有只读的printf行赋类型S_BLANK_BUT_OUTPUT，不只读的不(qu)做(ta)要(ma)求(de)；给所有含有等号(if和elseif语句自己解决)的语句赋类型S_ASSIGN；给所有左右花括号语句赋类型S_FIELD_BEGIN和S_FIELD_END，单独一行的自增自减自己解决一下就行。[没有前置自增自减运算符]
+现在deque已经变得特别听话，有问题立刻抛异常
+---------------------控制权交给运算器
+运算器注意：要懂得跳过空行，根据cmdType看text
+*新计算器可以考虑用一种新的符号代替负号，简化设计，同时避免--1和1- -1混淆
+运算器直接读到下列类型的statement时，应采取的行为如下(输出行号是输出到一个临时缓冲区里，最后要把重复的部分拿走)
+S_BLANK  直接跳过。
+S_BLANK_BUT_OUTPUT  输出行号，跳过。
+S_ASSIGN  输出行号，去空格，分割text，把等号之后的部分中的变量读出来，然后送进计算器，拿到结果赋值完事。
+S_ELSE  往后走，找到S_FIELD_END，跳出去就好。小心嵌套！
+S_IF  输出行号。先算内部式子的真假(向新计算器低头，别忘了读变量。)，如果为真，看下一个是不是S_FIELD_BEGIN，执行完了之后要跳过后面的else和elseif。。。如果为假，和刚才一样看一下有没有花括号，直接从右花括号出去就行。小心自增语句。。
+S_ELSE   既然都走到这儿来了，继续。
+S_ELSE_IF    输出行号。先算内部式子的真假(向新计算器低头，别忘了读变量。)，如果为真，看下一个是不是S_FIELD_BEGIN，执行完了之后要跳过后面的else和elseif。。。如果为假，和刚才一样看一下有没有花括号，直接从右花括号出去就行。小心自增语句。。
+S_FIELD_BEGIN  S_FIELD_END   变量作用域的问题我不知道怎么处理，，自己玩去。我不用进行任何操作
+S_GOTO   遍历搜索跳转目标的lineNum在哪儿，找到之后跳过去。找不到？把解析器程序员吊起来打。
+S_GOTO_DEST   跳过。
+S_ERROR   报错报错！把解析器作者吊起来打。
+--------------------控制权交给主框架，输出的那个int型数组也交给主框架
+主框架对连续重复的int进行删除，然后释放虚拟内存，最后输出结果(完结撒花)
+**************************************主要算法部分完毕
+2.数据结构的备注：
+cmdType对应text中的内容如下：
+S_ERROR 无意义
+ S_BLANK,无意义
+ S_BLANK_BUT_OUTPUT,无意义
+ S_ASSIGN,完整的一行语句字符串，不含逗号分号
+ S_FIELD_BEGIN,无意义
+ S_FIELD_END,无意义
+S_GOTO,目标GOTO_DEST结构中那个特殊的lineNum的值(必须为负)
+ S_GOTO_DEST,无意义
+ S_IF,if括号内的那个式子
+S_ELSE_IF,if括号内的那个式子
+ S_ELSE,无意义
+
+3.部分摘录已经写好的statement类定义头
+statements.hpp:
+#pragma once
+#include <string>
+using namespace std; //注意 头文件中使用std是有意的
+
+typedef enum { S_ERROR = -257, S_BLANK = 0, S_BLANK_BUT_OUTPUT, S_ASSIGN, S_FIELD_BEGIN, S_FIELD_END, S_GOTO, S_GOTO_DEST, S_IF, S_ELSE, S_ELSE_IF/*, S_NEED_CALC = 256*/ } STATEMENT_T;
+class statement
+{
+public:
+	statement(int i, const string &s, STATEMENT_T st) : lineNum(i), text(s), cmdType(st)/*, lengthOfAdditionalInfo(0), pAdditionalInfo(nullptr)*/ {}
+public:
+	int lineNum;//行号为负值时，代表无需输出行号
+	string text;
+	STATEMENT_T cmdType;//用于解析器和代码执行器之间进行通讯，减少重复解析
+};
+////////////////////////////////////FrameWork Document by Recolic Keghart
