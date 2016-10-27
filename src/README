@@ -1,0 +1,5 @@
+# TIP:
+Put your main function prototype in processor.hpp and analyser.hpp, and make any source file to define your proc.
+Useful extern variables (as a port) are all available in stdafx_.hpp.
+Report error by return a non-zero value from *_main();
+Have fun!
