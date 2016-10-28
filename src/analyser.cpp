@@ -268,7 +268,7 @@ int if else for break while do \r\n \t printf return
 _____##@@...*/
 
 string last_priority(",");
-string low_priority("= == > < >= <= != "); // equate & inequate operators
+string low_priority("= e > < L S n "); // equate & inequate operators
 string mid_priority("+-");
 string high_priority("*/");
 
@@ -339,7 +339,7 @@ void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber){
 		// check unary
 		for(int i=st;i<=ed-1;i++){
 
-			if(exprlist->get(i)->prev->item.type==TYPE_OPER and exprlist->get(i)->item.type==TYPE_OPER and exprlist->get(i)->next->item.type==TYPE_NUM){
+			if(exprlist->get(i)->prev->item.type==TYPE_OPER and exprlist->get(i)->item.type==TYPE_OPER and (exprlist->get(i)->next->item.type==TYPE_OPERAND or exprlist->get(i)->next->item.type==TYPE_OPERAND_VAR)){
 				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
 				ed--;
 				switch(exprlist->get(i)->item.oper){
@@ -514,46 +514,113 @@ void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber){
 			if(exprlist->get(i)->item.type==TYPE_OPER and low_priority.find(exprlist->get(i)->item.oper)!=std::string::npos){
 				ed-=2;
 				switch(exprlist->get(i)->item.oper){
-					case '+':
+					case '=':
 						//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)+(exprlist->get(i+1)->item.number);
 						if(exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR && exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" + "+formatVarName(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
+							assignStatement(ln,exprlist->get(i-1)->item.number,formatVarName(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=exprlist->get(i+1)->item.number;
 						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" + "+itos(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-						}else if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" + "+formatVarName(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+							assignStatement(ln,exprlist->get(i-1)->item.number,itos(exprlist->get(i+1)->item.number);
+							exprlist->get(i-1)->item.number=exprlist->get(i+1)->item.number;
+                            exprlist->get(i-1)->item.type=TYPE_OPERAND;
 						}else{
-							// all operands are instant value!
-							// that's simple!
-							exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)+(exprlist->get(i+1)->item.number);
+							// SyntaxErrorException
 						}
 						break;
-					case '-':
+					case 'e':
 						//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
 						if(exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR && exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
 							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" - "+formatVarName(exprlist->get(i+1)->item.number));
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" == "+formatVarName(exprlist->get(i+1)->item.number));
 							exprlist->get(i-1)->item.number=-srctmpvar;
 						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
 							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" - "+itos(exprlist->get(i+1)->item.number));
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" == "+itos(exprlist->get(i+1)->item.number));
 							exprlist->get(i-1)->item.number=-srctmpvar;
 						}else if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
 							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" - "+formatVarName(exprlist->get(i+1)->item.number));
+							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" == "+formatVarName(exprlist->get(i+1)->item.number));
 							exprlist->get(i-1)->item.number=-srctmpvar;
 							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
 						}else{
 							// all operands are instant value!
 							// that's simple!
-							exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
+							int srctmpvar=allocTempVar();
+                            assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" == "+itos(exprlist->get(i+1)->item.number));
+                            exprlist->get(i-1)->item.number=-srctmpvar;
+							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+						}
+						break;
+                    case 'L':
+						//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
+						if(exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR && exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" >= "+formatVarName(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" >= "+itos(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+						}else if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" >= "+formatVarName(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+						}else{
+							// all operands are instant value!
+							// that's simple!
+							int srctmpvar=allocTempVar();
+                            assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" >= "+itos(exprlist->get(i+1)->item.number));
+                            exprlist->get(i-1)->item.number=-srctmpvar;
+							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+						}
+						break;
+                    case 'S':
+						//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
+						if(exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR && exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" <= "+formatVarName(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" <= "+itos(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+						}else if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" <= "+formatVarName(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+						}else{
+							// all operands are instant value!
+							// that's simple!
+							int srctmpvar=allocTempVar();
+                            assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" <= "+itos(exprlist->get(i+1)->item.number));
+                            exprlist->get(i-1)->item.number=-srctmpvar;
+							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+						}
+						break;
+                    case 'n':
+						//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
+						if(exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR && exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" != "+formatVarName(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" != "+itos(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+						}else if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
+							int srctmpvar=allocTempVar();
+							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" != "+formatVarName(exprlist->get(i+1)->item.number));
+							exprlist->get(i-1)->item.number=-srctmpvar;
+							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+						}else{
+							// all operands are instant value!
+							// that's simple!
+							int srctmpvar=allocTempVar();
+                            assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" != "+itos(exprlist->get(i+1)->item.number));
+                            exprlist->get(i-1)->item.number=-srctmpvar;
+							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
 						}
 						break;
 					default:
@@ -564,50 +631,20 @@ void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber){
 				i--;
 			}
 		}
-		for(int i=st;i<=ed;i++){//mid
-			if(exprlist->get(i)->item.type==TYPE_OPER and mid_priority.find(exprlist->get(i)->item.oper)!=std::string::npos){
+		for(int i=st;i<=ed;i++){//lowest
+			if(exprlist->get(i)->item.type==TYPE_OPER and last_priority.find(exprlist->get(i)->item.oper)!=std::string::npos){
 				ed-=2;
 				switch(exprlist->get(i)->item.oper){
-					case '+':
+					case ',':
 						//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)+(exprlist->get(i+1)->item.number);
-						if(exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR && exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" + "+formatVarName(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" + "+itos(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-						}else if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" + "+formatVarName(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
+						if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
+                            exprlist->get(i-1)->item.number=(exprlist->get(i+1)->item.number);
+                            exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
 						}else{
-							// all operands are instant value!
+							// right operands are instant value!
 							// that's simple!
-							exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)+(exprlist->get(i+1)->item.number);
-						}
-						break;
-					case '-':
-						//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
-						if(exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR && exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" - "+formatVarName(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,formatVarName(exprlist->get(i-1)->item.number)+" - "+itos(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-						}else if(exprlist->get(i+1)->item.type==TYPE_OPERAND_VAR){
-							int srctmpvar=allocTempVar();
-							assignStatement(ln,-srctmpvar,itos(exprlist->get(i-1)->item.number)+" - "+formatVarName(exprlist->get(i+1)->item.number));
-							exprlist->get(i-1)->item.number=-srctmpvar;
-							exprlist->get(i-1)->item.type=TYPE_OPERAND_VAR;
-						}else{
-							// all operands are instant value!
-							// that's simple!
-							exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
+							exprlist->get(i-1)->item.number=(exprlist->get(i+1)->item.number);
+                            exprlist->get(i-1)->item.type=TYPE_OPERAND;
 						}
 						break;
 					default:
@@ -623,9 +660,63 @@ void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber){
 		//printf("size:%d\n",exprlist->size());
 	}
 }
-// calculate the expression
+// having the brackets part
+// operator D -> int
+// operator W -> while loop
+// operator F -> for loop
+// operator P -> printf
+
 void rcalc(qLinkedList<item> *exprlist){
-	
+	/* possible sing_line expressions are:
+     * D varname = expression(or just close)
+     * W expression
+     * F expression ; expression ; expression
+     * P
+     * a=b like:not have startup operators
+     */
+    // detect startup operators
+    if(exprlist->first->item.type==TYPE_OPER){
+        
+    }else{
+        // that indicates it's an very simple assign statement(but may have brackets!).
+        bool havebrackets=true;
+        int firstplace=-1;
+        int lastplace=-1;
+        while(havebrackets){
+            //printstack(*exprlist);
+            //printf("size:%d\n",exprlist->size());
+			havebrackets=false;
+			//check brackets
+			for(int i=0;i<exprlist->size();i++){
+				if(exprlist->get(i)->item.type==TYPE_OPER and exprlist->get(i)->item.oper=='('){
+					havebrackets=true;
+					firstplace=i;
+				}
+				if(exprlist->get(i)->item.type==TYPE_OPER and exprlist->get(i)->item.oper==')'){
+					havebrackets=true;
+					lastplace=i;
+					break;
+				}
+			}
+			if(havebrackets==true){
+				//printf("have brackets:from %d to %d\n",firstplace,lastplace);
+				bfcalc(exprlist,firstplace,lastplace);
+				//printstack(*exprlist);
+				//printf("size:%d\n",exprlist->size());
+				firstplace=-1;lastplace=-1;
+			}
+		}
+    }
+    item lb,rb;
+	lb.type=TYPE_OPER;
+	lb.oper='(';
+	rb.type=TYPE_OPER;
+	rb.oper=')';
+	exprlist->addfirst(lb);
+	exprlist->addlast(rb);
+	bfcalc(exprlist,0,exprlist->size()-1);
+    
+    /* ------------------------orig code
 	bool havebrackets=true;
 	int firstplace=-1;
 	int lastplace=-1;
@@ -662,8 +753,10 @@ void rcalc(qLinkedList<item> *exprlist){
 	rb.oper=')';
 	exprlist->addfirst(lb);
 	exprlist->addlast(rb);
-	bfcalc(exprlist,0,exprlist->size()-1);
+	bfcalc(exprlist,0,exprlist->size()-1);*/
 }
+
+// when detected "for" loop, ignore next 2 ';'s (not to close statement too early.
 
 
 int analyse_main(){
