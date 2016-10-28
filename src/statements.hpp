@@ -1,15 +1,15 @@
 #pragma once
 #include <string>
 
-typedef enum { S_ERROR = -257, S_BLANK = 0, S_BLANK_BUT_OUTPUT, S_ASSIGN, S_FIELD_BEGIN, S_FIELD_END, S_GOTO, S_GOTO_DEST, S_IF, S_ELSE, S_ELSE_IF } STATEMENT_T;
+typedef enum { S_ERROR = -257, S_BLANK = 0, S_BLANK_BUT_OUTPUT, S_ASSIGN, S_FIELD_BEGIN, S_FIELD_END, S_GOTO, S_GOTO_DEST, S_BREAK, S_IF, S_ELSE, S_ELSE_IF } STATEMENT_T;
 class statement
 {
 public:
 	statement() = delete;
 	statement(int i, const std::string &s, STATEMENT_T st) : lineNum(i), text(s), cmdType(st) {}
 public:
-	int lineNum;//ĞĞºÅÎª¸ºÖµÊ±£¬´ú±íÎŞĞèÊä³öĞĞºÅ
+	int lineNum;//è¡Œå·ä¸ºè´Ÿå€¼æ—¶ï¼Œä»£è¡¨æ— éœ€è¾“å‡ºè¡Œå·
 	std::string text;
-	STATEMENT_T cmdType;//ÓÃÓÚ½âÎöÆ÷ºÍ´úÂëÖ´ĞĞÆ÷Ö®¼ä½øĞĞÍ¨Ñ¶£¬¼õÉÙÖØ¸´½âÎö
+	STATEMENT_T cmdType;//ç”¨äºè§£æå™¨å’Œä»£ç æ‰§è¡Œå™¨ä¹‹é—´è¿›è¡Œé€šè®¯ï¼Œå‡å°‘é‡å¤è§£æ
 };
 
