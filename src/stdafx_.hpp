@@ -1,6 +1,7 @@
 #pragma once
 #include <deque>
 #include <vector>
+#include <stack>
 #include <memory>
 #include "statements.hpp"
 #define VIRTUAL_MEMORY_SIZE 256
