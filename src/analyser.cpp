@@ -984,10 +984,15 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 	
 }
 
+// convert deque<statement> into qLinkedLists and send to rcalc()
+
 // when detected "for" loop, ignore next 2 ';'s (not to close statement too early.
 // when meet { or } , close statement immediately.the close result must include { or } itself.
 // when meet "else" , close statement immediately.
 
+void genExpr(){
+	
+}
 
 int analyse_main(){
     // deque<statement> buf is input global var
