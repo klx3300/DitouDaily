@@ -18,7 +18,7 @@ using namespace std;
 
 deque<statement> buf;
 vector<int> print_buffer;
-int *pMemory = nullptr;
+shared_ptr<int> pMemory;
 
 namespace recolic_frame
 {
@@ -64,19 +64,19 @@ int main()
 
 void recolic_frame::cut_comment(string *ps)
 {
-	//´«ÈëÒ»¸öÎÄ±¾ĞĞ£¬É±ËÀ×¢ÊÍºÍ\t£¬É±ËÀË«ÒıºÅÄÚµÄ¶«Î÷
+	//ä¼ å…¥ä¸€ä¸ªæ–‡æœ¬è¡Œï¼Œæ€æ­»æ³¨é‡Šå’Œ\tï¼Œæ€æ­»åŒå¼•å·å†…çš„ä¸œè¥¿
 }
 
 bool recolic_frame::is_var_name(const string &s_)
 {
-	//ÅĞ¶ÏÊäÈëµÄ×Ö·û´®ÊÇ·ñÊÇÒ»¸öºÏ·¨µÄ±äÁ¿Ãû
+	//åˆ¤æ–­è¾“å…¥çš„å­—ç¬¦ä¸²æ˜¯å¦æ˜¯ä¸€ä¸ªåˆæ³•çš„å˜é‡å
 	string s = s_;
-	remove_if(s.begin(), s.end(), [](char ch) -> bool {return ch == ' ';});//È¥¿Õ¸ñ
-	//Ê×Î²È¥ÔËËã·û
+	remove_if(s.begin(), s.end(), [](char ch) -> bool {return ch == ' ';});//å»ç©ºæ ¼
+	//é¦–å°¾å»è¿ç®—ç¬¦
 	if (s == "int" || s == "if" || s == "else" || s == "for" || s == "break" || s == "while" || s == "do" || s == "printf" || s == "return")
 		return false;
-	//¶ÏÑÔ²»È«ÎªÊı×Ö
-	//¶ÏÑÔËùÓĞ×Ö·ûºÏÊÊ
+	//æ–­è¨€ä¸å…¨ä¸ºæ•°å­—
+	//æ–­è¨€æ‰€æœ‰å­—ç¬¦åˆé€‚
 	return true;
 }
 
