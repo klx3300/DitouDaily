@@ -1,11 +1,14 @@
 #pragma once
 #include <deque>
 #include <vector>
-#include <memory>
+#include <stack>
 #include "statements.hpp"
-#define VIRTUAL_MEMORY_SIZE 256
+
+#define cout
+#define wcout
+#define printf
+#define wprintf
 
 extern deque<statement> buf;
-extern shared_ptr<int> pMemory;
 extern vector<int> print_buffer;
 extern void __cdecl global_new_handler();
