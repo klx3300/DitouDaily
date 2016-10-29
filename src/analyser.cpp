@@ -984,14 +984,227 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 	
 }
 
+std::string valid_numbers("1234567890");
+
+const int BRACKET_FLAG_NOLOOP=-1,BRACKET_FLAG_LOOP=0,BRACKET_FLAG=1;
+
 // convert deque<statement> into qLinkedLists and send to rcalc()
 
-// when detected "for" loop, ignore next 2 ';'s (not to close statement too early.
+// when detected any cond or loop statements,use bracket-stack to check the close of this statement.
 // when meet { or } , close statement immediately.the close result must include { or } itself.
 // when meet "else" , close statement immediately.
 
 void genExpr(){
-	
+	// convert deque input_buf into a single string.
+	string expr("");
+	int ln=0;
+	expr=input_buf[ln];
+	char readbuffer=0;
+	int for_comment=0;
+	string numberbuffer;
+	qLinkedList<item> *exprlist=new exprlist();
+	qLinkedList<int> bracketstack;
+	bracketstack.addfirst(BRACKET_FLAG_NOLOOP);
+	bool flag_exprclosed=false;
+	// read all valid sing-line expr to an linkedlist.
+	// and sent to rcalc immediately.
+	// in case all var names are replaced,
+	// check start-up char directly.
+	for(int i=0;i<expr.size();i++){
+		readbuffer=expr[i];
+		if(readbuffer!=0 and readbuffer!=' '){
+			if(valid_numbers.find(readbuffer)!=string::npos){
+				if(expr[i-1]=='@'){
+					// case VARIABLE
+					numberbuffer+="@";
+				}
+				numberbuffer+=readbuffer;
+			}else{
+				//reached an operator
+				//close numberbuffer
+				if(numberbuffer!=""){
+					item it;
+					if(numberbuffer[0]=="@"){
+						numberbuffer.erase(0,1);
+						it.type=TYPE_OPERAND_VAR
+					}else{
+						it.type=TYPE_OPERAND;
+					}
+					it.number=qatof(numberbuffer);
+					//printf("num:%.2lf\n",it.number);
+					exprlist->addlast(it);
+					numberbuffer="";
+				}
+				if(readbuffer=='i' and expr[i+1]=='n'){
+					i+=2;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='D';
+					exprlist->addlast(it);
+				}else if(readbuffer=='i' and expr[i+1]=='f'){
+					i+=1;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='J';
+					exprlist->addlast(it);
+				}else if(readbuffer=='w'){
+					i+=4;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='W';
+					exprlist->addlast(it);
+					bracketstack.last->item=BRACKET_FLAG_LOOP;
+				}else if(readbuffer=='f'){
+					for_comment=2;
+					i+=2;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='F';
+					exprlist->addlast(it);
+					bracketstack.last->item=BRACKET_FLAG_LOOP;
+				}else if(readbuffer=='d'){
+					i+=1;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='o';
+					exprlist->addlast(it);
+				}else if(readbuffer=='p'){
+					i+=5;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='P';
+					exprlist->addlast(it);
+				}else if(readbuffer=='e'){
+					i+=3;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='E';
+					exprlist->addlast(it);
+					flag_exprclosed=true;
+				}else if(readbuffer=='b'){
+					i+=4;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='B';
+					exprlist->addlast(it);
+				}else if(readbuffer=='('){
+					item it;
+					it.type=TYPE_OPER;
+					it.oper=readbuffer;
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+					if(bracketstack.first->item==BRACKET_FLAG or bracketstack.first->item==BRACKET_FLAG_LOOP){
+						bracketstack.addfirst(BRACKET_FLAG);
+					}
+				}else if(readbuffer==')'){
+					item it;
+					it.type=TYPE_OPER;
+					it.oper=readbuffer;
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+					if(bracketstack.first->item==BRACKET_FLAG){
+						bracketstack.popfirst();
+						if(bracketstack.first->item==BRACKET_FLAG_LOOP){
+							bracketstack.first->item=BRACKET_FLAG_NOLOOP;
+							flag_exprclosed=true;
+						}
+					}
+				}else if(readbuffer=='{' or readbuffer == '}'){
+					item it;
+					it.type=TYPE_OPER;
+					it.oper=readbuffer;
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+					flag_exprclosed=true;
+				}else if(readbuffer==';'){
+					if(for_comment>0){
+						for_comment--;
+						item it;
+						it.type=TYPE_OPER;
+						it.oper=readbuffer;
+						//printf("oper:%c\n",readbuffer);
+						exprlist->addlast(it);
+					}else{
+						flag_exprclosed=true;
+					}
+				}else if(readbuffer=='+' and expr[i+1]=='+'){
+					i++;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='i';
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+				}else if(readbuffer=='-' and expr[i+1]=='-'){
+					i++;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='d';
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+				}else if(readbuffer=='>' and expr[i+1]=='='){
+					i++;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='L';
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+				}else if(readbuffer=='<' and expr[i+1]=='='){
+					i++;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='S';
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+				}else if(readbuffer=='=' and expr[i+1]=='='){
+					i++;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='e';
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+				}else if(readbuffer=='!' and expr[i+1]=='='){
+					i++;
+					item it;
+					it.type=TYPE_OPER;
+					it.oper='n';
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+				}else{
+					item it;
+					it.type=TYPE_OPER;
+					it.oper=readbuffer;
+					//printf("oper:%c\n",readbuffer);
+					exprlist->addlast(it);
+				}
+			}
+			//if statement closed,sent to rcalc.
+			if(flag_exprclosed){
+				rcalc(exprlist,ln);
+				delete exprlist;
+				exprlist=new exprlist();
+			}
+			if(i+1=expr.size() and ln+1<input_buf.size()){
+				ln++;
+				expr=input_buf[ln];
+				i=-1;
+			}
+		}
+	}
+	/*// close numberbuffer
+	if(numberbuffer!=""){
+		item it;
+		if(numberbuffer[0]=='@'){
+			numberbuffer.erase(0,1);
+			it.type=TYPE_OPERAND_VAR
+		}else{
+			it.type=TYPE_OPERAND;
+		}
+		it.number=qatof(numberbuffer);
+		//printf("num:%.2lf\n",it.number);
+		exprlist.addlast(it);
+		numberbuffer="";
+	}
+	rcalc(&exprlist);*/
 }
 
 int analyse_main(){
