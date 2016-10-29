@@ -19,6 +19,7 @@
 #define CPU_ERROR(error_code) { cout << "\nException occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 using namespace std;
 
+deque<statement> input_buf;
 deque<statement> buf;
 vector<int> print_buffer;
 int *pMemory = nullptr;
@@ -33,8 +34,6 @@ namespace recolic_frame
 	map<string, int> buf_map;
 	std::vector<std::string> DivideString(const std::string &tod);
 }
-
-
 
 int main()
 {
