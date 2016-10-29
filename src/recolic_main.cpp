@@ -51,7 +51,7 @@ int main()
 		frm_tmp_buf_ = frm_tmp_buf;
 		recolic_frame::cut_comment(&frm_tmp_buf_);
 		recolic_frame::format_var_name(&frm_tmp_buf_);
-		buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
+		input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
 		++frm_lineNum;
 		ifs.getline(frm_tmp_buf, 256);
 	}
