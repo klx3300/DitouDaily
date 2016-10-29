@@ -9,6 +9,7 @@
 #include <new>
 #include <map>
 #include <cctype>
+#include <sstream>
 #include "stdafx_.hpp"
 #include "analyser.hpp"
 #include "processor.hpp"
@@ -23,13 +24,13 @@ deque<statement> input_buf;
 deque<statement> buf;
 vector<int> print_buffer;
 int *pMemory = nullptr;
+void __cdecl global_new_handler();
 
 namespace recolic_frame
 {
 	void cut_comment(string *);
 	bool is_var_name(const string &);
 	size_t format_var_name(string *);
-	void cut_dup_ele_in_print();
 	bool current_line_is_comment = false;
 	map<string, int> buf_map;
 	std::vector<std::string> DivideString(const std::string &tod);
@@ -54,21 +55,37 @@ int main()
 		++frm_lineNum;
 		ifs.getline(frm_tmp_buf, 256);
 	}
+	ifs.close();
 	int analyse_error_code = analyse_main();
 	if (analyse_error_code)
 		ANA_ERROR(analyse_error_code);
 	int processor_error_code = processor_main();
 	if (processor_error_code)
 		CPU_ERROR(processor_error_code);
-	recolic_frame::cut_dup_ele_in_print();
-	ostream_iterator<int> oi(cout, " ");
-	copy(print_buffer.cbegin(), print_buffer.cend(), oi);
+
+	{ //Final deal
+		int last_success = -1;
+		stringstream ss;
+		for (size_t cter = 0;cter < print_buffer.size();++cter)
+		{
+			if (print_buffer[cter] != last_success)
+			{
+				last_success = print_buffer[cter];
+				ss << last_success << ' ';
+			}
+		}
+		string too = ss.str();
+		too = too.substr(0, too.size() - 1);
+		ofstream os("output.txt", ios::out);
+		os << too;
+		os.close();
+	}
 	return 0;
 }
 
 void recolic_frame::cut_comment(string *ps)
 {
-	//å…ˆæ€è·¨è¡Œæ³¨é‡Š
+	//ÏÈÉ±¿çĞĞ×¢ÊÍ
 	size_t comment_e = string::npos;
 	if (recolic_frame::current_line_is_comment)
 	{
@@ -86,11 +103,11 @@ void recolic_frame::cut_comment(string *ps)
 		}
 	}
 re_cut:
-	//å†æ€è¡Œå†…æ³¨é‡Š(è€ƒè™‘è·¨è¡Œ)
+	//ÔÙÉ±ĞĞÄÚ×¢ÊÍ(¿¼ÂÇ¿çĞĞ)
 	size_t comment_b = ps->find("/*");
 	if (comment_b != string::npos)
 	{
-		comment_e = ps->find("*/",comment_b + 2);
+		comment_e = ps->find("*/", comment_b + 2);
 		if (comment_e == string::npos)
 		{
 			recolic_frame::current_line_is_comment = true;
@@ -104,32 +121,35 @@ re_cut:
 		}
 	}
 re_cut_:
-	//å†æ€åŒå¼•å·å†…å®¹
-	size_t quote_p = ps->find('\"');
+	//ÔÙÉ±Ë«ÒıºÅÄÚÈİ
+	size_t quote_p = ps->find('"');
 	if (quote_p != string::npos)
 	{
-		size_t quote_p_ = ps->find('\"', quote_p + 1);
+		size_t quote_p_ = ps->find('"', quote_p + 1);
 		if (quote_p_ == string::npos)
 		{
 			FRM_ERROR_(5);
 		}
+		else if (quote_p_ == quote_p + 1)
+			;
 		else
 		{
 			ps->erase(ps->begin() + quote_p + 1, ps->begin() + quote_p_);
 			goto re_cut_;
 		}
 	}
-	//å†æ€åŒæ æ³¨é‡Š
+	//ÔÙÉ±Ë«¸Ü×¢ÊÍ
 	size_t qpq = ps->find("//");
 	*ps = ps->substr(0, qpq);
-	//æ€å…‰\tå®Œäº‹
-	remove_if(ps->begin(), ps->end(), [](char ch) -> bool { return ch == '\t'; });
+	//É±¹â\t\rÍêÊÂ
+	auto last_it = remove_if(ps->begin(), ps->end(), [](char ch) -> bool { return ch == '\t' || ch == '\r'; });
+	ps->erase(last_it, ps->end());
 	return;
 }
 
 bool recolic_frame::is_var_name(const string &s)
 {
-	//åˆ¤æ–­è¾“å…¥çš„å­—ç¬¦ä¸²æ˜¯å¦æ˜¯ä¸€ä¸ªåˆæ³•çš„å˜é‡å
+	//ÅĞ¶ÏÊäÈëµÄ×Ö·û´®ÊÇ·ñÊÇÒ»¸öºÏ·¨µÄ±äÁ¿Ãû
 	if (s.empty())
 		return false;
 	if (s == "int" || s == "if" || s == "else" || s == "for" || s == "break" || s == "while" || s == "do" || s == "printf" || s == "return")
@@ -155,11 +175,11 @@ bool recolic_frame::is_var_name(const string &s)
 #define M(ch) ||markch==ch
 size_t recolic_frame::format_var_name(string *ps)
 {
-	//ä»¥è¿ç®—ç¬¦å’Œç©ºæ ¼ä¸ºç•Œã€‚
-	//å…ˆæ„å»ºHashè¡¨
+	//ÒÔÔËËã·ûºÍ¿Õ¸ñÎª½ç¡£
+	//ÏÈ¹¹½¨Hash±í
 	vector<string> usedHash;
 	auto rets = DivideString(*ps);
-	int max_var_num = 0;
+	static int max_var_num = 0;
 	for (size_t cter = 0;cter < rets.size();++cter)
 	{
 		const string &ts = rets[cter];
@@ -176,46 +196,34 @@ size_t recolic_frame::format_var_name(string *ps)
 			usedHash.push_back(ts);
 		}
 	}
-	//å†æ ¹æ®Hashè¡¨æ›¿æ¢
+	//ÔÙ¸ù¾İHash±íÌæ»»
 	for (size_t cter = 0;cter < usedHash.size();++cter)
 	{
 		size_t cp = ps->find(usedHash[cter]);
 		size_t cpl = cp + usedHash[cter].size();
-	re_comp:
-		char markch = (*ps)[cpl + 1];
-		if (!(markch == ' ' M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('\"') M('?') M(':')))
+		bool cOK = false;
+		do
 		{
-			cp = ps->find(usedHash[cter], cp + 1);
-			cpl = cp + usedHash[cter].size();
-			goto re_comp;
-		}
+			cOK = false;
+			char markch = (*ps)[cpl];
+			if (!(markch == ' ' M(0) M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':')))
+			{
+				cp = ps->find(usedHash[cter], cp + 1);
+				cpl = cp + usedHash[cter].size();
+				cOK = true;
+			}
+		} while (cOK);
 		ps->erase(ps->begin() + cp, ps->begin() + cpl);
 		string toi = "_____##@@";
 		toi += to_string(buf_map[usedHash[cter]]);
 		ps->insert(cp, toi);
 	}
-	return size_t();
-}
-
-void recolic_frame::cut_dup_ele_in_print()
-{
-	int last_success = -1;
-	vector<int> new_vct;
-	for (size_t cter = 0;cter < print_buffer.size();++cter)
-	{
-		if (print_buffer[cter] != last_success)
-		{
-			last_success = print_buffer[cter];
-			new_vct.push_back(last_success);
-		}
-	}
-	print_buffer.swap(new_vct);
-	return;
+	return max_var_num;
 }
 
 void __cdecl global_new_handler()
 {
-	cout << "\nERROR:bad_alloc occurred! You need more memory!"<< endl;
+	cout << "\nERROR:bad_alloc occurred! You need more memory!" << endl;
 	system("pause");
 	exit(1);
 }
@@ -223,12 +231,14 @@ void __cdecl global_new_handler()
 #define I(ch) ||ich==ch
 std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
 {
-	auto o_find = [](const string &istr,size_t ioffset = 0) -> size_t {
+	if (tod.empty())
+		return vector<string>();
+	auto o_find = [](const string &istr, size_t ioffset = 0) -> size_t {
 		size_t cter = ioffset;
 		for (;cter < istr.size();++cter)
 		{
 			char ich = istr[cter];
-			if (ich == ' ' I('-') I('*') I('/') I(';') I(',') I('.') I(')') I('(') I('+') I('>') I('<') I('=') I('{') I('}') I('\"') I('?') I(':'))
+			if (ich == ' ' I('-') I('*') I('/') I(';') I(',') I('.') I(')') I('(') I('+') I('>') I('<') I('=') I('{') I('}') I('"') I('?') I(':'))
 				break;
 		}
 		if (cter == istr.size())
@@ -241,7 +251,7 @@ std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
 	std::vector<std::string> sbuf;
 	if (thisPos != std::string::npos)
 	{
-		if(thisPos)
+		if (thisPos)
 			sbuf.push_back(tod.substr(0, thisPos));
 		goto gt_1;
 	}
