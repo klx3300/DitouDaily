@@ -28,7 +28,6 @@ template <class T>
 class qLinkedList{
 	public:
 	qLinkedList();
-	qLinkedList(qLinkedList<T> src);
 	qNode<T>* first;
 	qNode<T>* last;
 	virtual T popfirst();
@@ -49,13 +48,6 @@ template<class T>
 qLinkedList<T>::qLinkedList(){
 	first=NULL;
 	last=NULL;
-}
-
-template<class T>
-qLinkedList<T>::qLinkedList(qLinkedList<T> src){
-	for(int i=0;src.get(i)!=NULL;i++){
-		addlast(src.get(i));
-	}
 }
 
 template<class T>
@@ -215,15 +207,16 @@ item::item(){
 	oper=0;
 }
 //void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber);
-
+int currIndex=0; // now analysis pointer position
+bool tmpvars[65536];
 void clearTempVarFlags(){
-    for(int i<0;i<256;i++){
+    for(int i=0;i<256;i++){
         tmpvars[i]=false;
     }
 }
 int allocTempVar(){
     // search for avaliable tmpvar
-    for(int i<0;i<256;i++){
+    for(int i=0;i<256;i++){
         if(tmpvars[i]==false){
             tmpvars[i]=true;
             return i;
@@ -251,48 +244,48 @@ void defineStatement(int ln,int varname){
 	tmpstr+="int _____##@@";
 	tmpstr+=itos(varname);
 	statement s(ln,tmpstr,S_ASSIGN);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 }
 
 void assignStatement(int ln,int varname,string simplest){
 	string tmpstr("_____##@@"+itos(varname)+" = "+simplest);
 	statement s(ln,tmpstr,S_ASSIGN);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 }
 
 void fieldStatement(int ln,STATEMENT_T type){
 	statement s(ln,"",type);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 }
 
 void gotoStatement(int ln){
 	statement s(ln,"",S_GOTO);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 }
 
 void gotodestStatement(int ln){
 	statement s(ln,"",S_GOTO_DEST);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 }
 
 void ifStatement(int ln,int varname){
 	statement s(ln,formatVarName(varname),S_IF);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 }
 
 void elseStatement(int ln){
 	statement s(ln,"",S_ELSE);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 }
 
 void printStatement(int ln){
 	statement s(ln,"",S_BLANK_BUT_OUTPUT);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 };
 
 void breakStatement(int ln){
 	statement s(ln,"",S_BREAK);
-	buf.insert(currIndex++,s);
+	buf.push_back(s);
 };
 
 
@@ -312,7 +305,7 @@ void breakStatement(int ln){
  */
 
 
-const int TYPE_OPERATOR=1;
+const int TYPE_OPER=1;
 const int TYPE_OPERAND=2;
 const int TYPE_OPERAND_VAR=3;
 
@@ -335,8 +328,7 @@ string high_priority("*/");
 // operator 'S' indicates <= operator
 // operator 'n' indicates != operator
 
-int currIndex=0; // now analysis pointer position
-bool tmpvars[65536];
+
 
 //bracket-free part
 void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber){
@@ -576,7 +568,7 @@ void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber){
 							assignStatement(ln,exprlist->get(i-1)->item.number,formatVarName(exprlist->get(i+1)->item.number));
 							exprlist->get(i-1)->item.number=exprlist->get(i+1)->item.number;
 						}else if (exprlist->get(i-1)->item.type==TYPE_OPERAND_VAR){
-							assignStatement(ln,exprlist->get(i-1)->item.number,itos(exprlist->get(i+1)->item.number);
+							assignStatement(ln,exprlist->get(i-1)->item.number,itos(exprlist->get(i+1)->item.number));
 							exprlist->get(i-1)->item.number=exprlist->get(i+1)->item.number;
                             exprlist->get(i-1)->item.type=TYPE_OPERAND;
 						}else{
@@ -790,21 +782,21 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 			case 'D':
 				defineStatement(ln,exprlist->get(1)->item.number);
 				exprlist->popfirst();
-				debracket_process(exprlist);
-				rebracket_process(exprlist);
+				debracket_process(exprlist,ln);
+				rebracket_process(exprlist,ln);
 				break;
 			case 'J':
 				exprlist->popfirst();
 				fieldStatement(ln,S_FIELD_BEGIN);
 				if(exprlist->last->item.oper=='{'){
 					exprlist->poplast();
-					debracket_process(exprlist);
-					rebracket_process(exprlist);
+					debracket_process(exprlist,ln);
+					rebracket_process(exprlist,ln);
 					ifStatement(ln,exprlist->first->item.number);
 					fieldStack.addfirst(FIELD_NORMAL_FALSE);
 				}else{
-					debracket_process(exprlist);
-					rebracket_process(exprlist);
+					debracket_process(exprlist,ln);
+					rebracket_process(exprlist,ln);
 					ifStatement(ln,exprlist->first->item.number);
 					fieldStack.addfirst(FIELD_NORMAL_TRUE);
 				}
@@ -817,14 +809,14 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 					if(exprlist->last->item.oper=='{'){
 						exprlist->poplast();
 						gotodestStatement(ln);
-						debracket_process(exprlist);
-						rebracket_process(exprlist);
+						debracket_process(exprlist,ln);
+						rebracket_process(exprlist,ln);
 						ifStatement(ln,exprlist->first->item.number);
 						fieldStack.addfirst(FIELD_LOOP_FALSE);
 					}else{
 						gotodestStatement(ln);
-						debracket_process(exprlist);
-						rebracket_process(exprlist);
+						debracket_process(exprlist,ln);
+						rebracket_process(exprlist,ln);
 						ifStatement(ln,exprlist->first->item.number);
 						fieldStack.addfirst(FIELD_LOOP_TRUE);
 					}
@@ -832,26 +824,27 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 					// is a do-while loop!
 					fieldStack.popfirst();
 					exprlist->popfirst();
-					debracket_process(exprlist);
-					rebracket_process(exprlist);
+					debracket_process(exprlist,ln);
+					rebracket_process(exprlist,ln);
 					ifStatement(ln,exprlist->first->item.number);
 					gotoStatement(ln);
 					fieldStatement(ln,S_FIELD_END);
 				}
 				break;
 			case 'F':
+			{// fix the cross-initialization problem.
 				// divide the whole statement.
 				exprlist->popfirst();
 				qLinkedList<item> initexpr,condexpr,iterexpr;
-				for(int i=1;exprlist->get(i)->item.oper!=';';exprlist.popfirst()){
+				for(int i=1;exprlist->get(i)->item.oper!=';';exprlist->popfirst()){
 					initexpr.addlast(exprlist->get(i)->item);
 				}
 				exprlist->popfirst();
-				for(int i=1;exprlist->get(i)->item.oper!=';';exprlist.popfirst()){
+				for(int i=1;exprlist->get(i)->item.oper!=';';exprlist->popfirst()){
 					condexpr.addlast(exprlist->get(i)->item);
 				}
 				exprlist->popfirst();
-				for(int i=1;exprlist->get(i)->item.oper!=')';exprlist.popfirst()){
+				for(int i=1;exprlist->get(i)->item.oper!=')';exprlist->popfirst()){
 					iterexpr.addlast(exprlist->get(i)->item);
 				}
 				// qLinkedList<item> cpcondexpr(condexpr);
@@ -859,36 +852,37 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 				fieldStatement(ln,S_FIELD_BEGIN);
 				if(exprlist->last->item.oper=='{'){
 					exprlist->poplast();
-					debracket_process(&initexpr);
-					rebracket_process(&initexpr);
+					debracket_process(&initexpr,ln);
+					rebracket_process(&initexpr,ln);
 					assignStatement(ln,-998,"0");
 					gotodestStatement(ln);
 					fieldStatement(ln,S_FIELD_BEGIN);
 					ifStatement(ln,-998);
-					debracket_process(&iterexpr);
-					rebracket_process(&iterexpr);
+					debracket_process(&iterexpr,ln);
+					rebracket_process(&iterexpr,ln);
 					fieldStatement(ln,S_FIELD_END);
 					assignStatement(ln,-998,"1");
-					debracket_process(&condexpr);
-					rebracket_process(&condexpr);
+					debracket_process(&condexpr,ln);
+					rebracket_process(&condexpr,ln);
 					ifStatement(ln,condexpr.first->item.number);
 					fieldStack.addfirst(FIELD_LOOP_FALSE);
 				}else{
-					debracket_process(&initexpr);
-					rebracket_process(&initexpr);
+					debracket_process(&initexpr,ln);
+					rebracket_process(&initexpr,ln);
 					assignStatement(ln,-998,"0");
 					gotodestStatement(ln);
 					fieldStatement(ln,S_FIELD_BEGIN);
 					ifStatement(ln,-998);
-					debracket_process(&iterexpr);
-					rebracket_process(&iterexpr);
+					debracket_process(&iterexpr,ln);
+					rebracket_process(&iterexpr,ln);
 					fieldStatement(ln,S_FIELD_END);
 					assignStatement(ln,-998,"1");
-					debracket_process(&condexpr);
-					rebracket_process(&condexpr);
+					debracket_process(&condexpr,ln);
+					rebracket_process(&condexpr,ln);
 					ifStatement(ln,condexpr.first->item.number);
 					fieldStack.addfirst(FIELD_LOOP_TRUE);
 				}
+			}
 				break;
 			case 'P':
 				printStatement(ln);
@@ -936,8 +930,8 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 			default:
 				// that's a statement that have no meanings!
 				// but we still have to execute it due to the fucking requirements!
-				debracket_process(exprlist);
-				rebracket_process(exprlist);
+				debracket_process(exprlist,ln);
+				rebracket_process(exprlist,ln);
 				// check if last didn't use } to close field.
 				// true: didn't close normally(using '{' & '}')
 				// and commit close.
@@ -960,8 +954,8 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 		}
     }else{
         // that indicates it's an very simple assign statement(but may have brackets!).
-        debracket_process(exprlist);
-		rebracket_process(exprlist);
+        debracket_process(exprlist,ln);
+		rebracket_process(exprlist,ln);
 		// check if last didn't use } to close field.
 		// true: didn't close normally(using '{' & '}')
 		// and commit close.
@@ -984,7 +978,15 @@ void rcalc(qLinkedList<item> *exprlist,int ln){
 	
 }
 
-std::string valid_numbers("1234567890");
+double qatof(string str){
+	if(str[0]=='.')
+		str="0"+str;
+	if(str[str.size()-1]=='.')
+		str+="0";
+	return atof(str.c_str());
+}
+
+string valid_numbers("1234567890");
 
 const int BRACKET_FLAG_NOLOOP=-1,BRACKET_FLAG_LOOP=0,BRACKET_FLAG=1;
 
@@ -998,11 +1000,11 @@ void genExpr(){
 	// convert deque input_buf into a single string.
 	string expr("");
 	int ln=0;
-	expr=input_buf[ln];
+	expr=input_buf[ln].text;
 	char readbuffer=0;
 	int for_comment=0;
 	string numberbuffer;
-	qLinkedList<item> *exprlist=new exprlist();
+	qLinkedList<item> *exprlist=new qLinkedList<item>();
 	qLinkedList<int> bracketstack;
 	bracketstack.addfirst(BRACKET_FLAG_NOLOOP);
 	bool flag_exprclosed=false;
@@ -1024,9 +1026,9 @@ void genExpr(){
 				//close numberbuffer
 				if(numberbuffer!=""){
 					item it;
-					if(numberbuffer[0]=="@"){
+					if(numberbuffer[0]=='@'){
 						numberbuffer.erase(0,1);
-						it.type=TYPE_OPERAND_VAR
+						it.type=TYPE_OPERAND_VAR;
 					}else{
 						it.type=TYPE_OPERAND;
 					}
@@ -1182,11 +1184,11 @@ void genExpr(){
 			if(flag_exprclosed){
 				rcalc(exprlist,ln);
 				delete exprlist;
-				exprlist=new exprlist();
+				exprlist=new qLinkedList<item>();
 			}
-			if(i+1=expr.size() and ln+1<input_buf.size()){
+			if(i+1==expr.size() and ln+1<input_buf.size()){
 				ln++;
-				expr=input_buf[ln];
+				expr=input_buf[ln].text;
 				i=-1;
 			}
 		}
