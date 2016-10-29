@@ -1074,6 +1074,7 @@ void genExpr(){
 					it.type=TYPE_OPER;
 					it.oper='P';
 					exprlist->addlast(it);
+					flag_exprclosed=true;
 				}else if(readbuffer=='e'){
 					i+=3;
 					item it;
