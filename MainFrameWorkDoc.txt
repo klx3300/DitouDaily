@@ -12,7 +12,7 @@ _____##@@...
 杀死注释(这不会当场去除空行，只是挖掉注释的文本，由框架直接完成)和\t[注释有行内的/apple/]
 完成变量名字的替换(如_____##@@4分配虚拟内存时位于memory[4])
 分配并初始化虚拟内存//注：现在主框架并不会进行内存的分配，这由虚拟CPU完成。
-填充statement类，构建deque，向statement类中写入行号,cmdType暂时保持0
+填充statement类，构建deque，向statement类中写入行号,cmdType暂时保持S_ERROR
 --------------------控制权交给编译器
 //解析器注意：分为多行的时候一定别忘了把原始行号拷贝到所有新的statement中。
 首先遍历展开for循环和while循环为if()+goto。goto的目标节点(cmdType为S_GOTO_DEST)的行号应设为一个唯一负值，goto语句本身应在text中保存这个唯一负值(用to_string(int)和stoi(string)来进行转换)同时自身的cmdType应为S_GOTO。暂时不用考虑for循环里面会有多行语句。[可以考虑先把for换成while，然后从头重新遍历一遍，把while换成goto+if]
