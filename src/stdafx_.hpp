@@ -9,6 +9,7 @@
 #define printf
 #define wprintf
 
-extern deque<statement> buf;
+extern deque<statement> input_buf;//input to analyser.
+extern deque<statement> buf;//output from analyser.
 extern vector<int> print_buffer;
 extern void __cdecl global_new_handler();
