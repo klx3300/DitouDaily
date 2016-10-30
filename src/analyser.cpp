@@ -1152,6 +1152,7 @@ void genExpr() {
 					it.oper = 'P';
 					exprlist->addlast(it);
 					flag_exprclosed = true;
+					printf("EXPR CLOSE.\n");
 				}
 				else if (readbuffer == 'e') {
 					i += 3;
@@ -1160,6 +1161,7 @@ void genExpr() {
 					it.oper = 'E';
 					exprlist->addlast(it);
 					flag_exprclosed = true;
+					printf("EXPR CLOSE.\n");
 				}
 				else if (readbuffer == 'b') {
 					i += 4;
@@ -1189,6 +1191,7 @@ void genExpr() {
 						if (bracketstack.first->item == BRACKET_FLAG_LOOP) {
 							bracketstack.first->item = BRACKET_FLAG_NOLOOP;
 							flag_exprclosed = true;
+							printf("EXPR CLOSE.\n");
 						}
 					}
 				}
@@ -1199,6 +1202,7 @@ void genExpr() {
 					//printf("oper:%c\n",readbuffer);
 					exprlist->addlast(it);
 					flag_exprclosed = true;
+					printf("EXPR CLOSE.\n");
 				}
 				else if (readbuffer == ';') {
 					if (for_comment>0) {
@@ -1211,6 +1215,7 @@ void genExpr() {
 					}
 					else {
 						flag_exprclosed = true;
+						printf("EXPR CLOSE.\n");
 					}
 				}
 				else if (readbuffer == '+' and expr[i + 1] == '+') {
