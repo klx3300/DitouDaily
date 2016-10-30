@@ -19,6 +19,10 @@
 #define ANA_ERROR(error_code) { cout << "\nException occurred at analyse_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define CPU_ERROR(error_code) { cout << "\nException occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define RECOLIC_DEBUG
+
+#ifdef RECOLIC_DEBUG
+#include <Windows.h>
+#endif
 using namespace std;
 
 deque<statement> input_buf;
@@ -35,6 +39,55 @@ namespace recolic_frame
 	bool current_line_is_comment = false;
 	map<string, int> buf_map;
 	std::vector<std::string> DivideString(const std::string &tod);
+	string formatH(int i)
+	{
+		switch (i)
+		{
+		case S_BLANK:
+			return "S_BLANK";
+		case S_BLANK_BUT_OUTPUT:
+			return "S_BLANK_BUT_OUTPUT";
+		case S_ASSIGN:
+			return "S_ASSIGN";
+		case S_FIELD_BEGIN:
+			return "S_FIELD_BEGIN";
+		case S_FIELD_END:
+			return "S_FIELD_END";
+		case S_GOTO:
+			return "S_GOTO";
+		case S_GOTO_DEST:
+			return "S_GOTO_DEST";
+		case S_IF:
+			return "S_IF";
+		case S_ELSE:
+			return "S_ELSE";
+		case S_ELSE_IF:
+			return "S_ELSE_IF";
+		case S_BREAK:
+			return "S_BREAK";
+		case S_ERROR:
+			return "S_ERROR";
+		}
+	}
+	int _crt_analyse_startup_main()
+	{/*
+		auto last = remove_if(input_buf.begin(), input_buf.end(), [](const statement &s) -> bool {return s.text.empty();});
+		input_buf.erase(last, input_buf.end());
+	search_again:
+		auto pst = find_if(input_buf.begin(), input_buf.end(), [](statement &s) -> bool {
+			size_t pt = s.text.find("do", 0);
+			if (pt == string::npos)
+				return false;
+			auto last_ = remove_if(s.text.begin(), s.text.end(), [](char ch) -> bool {return ch == ' ';});
+			s.text.erase(last_, s.text.end());
+			if (s.text[pt + 2] != '{')
+				return true;
+		});//Ñ°ÕÒ·Ç·¨doÓï¾ä
+		pst->text.erase(pst->text.end() - 2, pst->text.end());
+		(pst + 1)->text = "do" + (pst + 1)->text;
+		goto search_again;*/
+		return analyse_main();
+	}
 }
 
 int main()
@@ -68,11 +121,11 @@ int main()
 	}
 	cout << "********************************\nNow try to launch Compiler...\n" << endl;
 #endif
-	int analyse_error_code = analyse_main();
+	int analyse_error_code = recolic_frame::_crt_analyse_startup_main();
 #ifdef RECOLIC_DEBUG
 	for (size_t cter = 0;cter < buf.size();++cter)
 	{
-		cout << buf[cter].lineNum << "|Type=" << buf[cter].cmdType << "> " << buf[cter].text << endl;
+		cout << buf[cter].lineNum << "|" << recolic_frame::formatH(buf[cter].cmdType) << "> " << buf[cter].text << endl;
 	}
 	cout << "Now try to launch CPU...\n" << endl;
 #endif
@@ -147,6 +200,7 @@ re_cut_:
 	if (quote_p != string::npos)
 	{
 		size_t quote_p_ = ps->find('"', quote_p + 1);
+		const size_t quote_p__ = quote_p_;
 		if (quote_p_ == string::npos)
 		{
 			FRM_ERROR_(5);
@@ -154,12 +208,19 @@ re_cut_:
 		else
 		{
 			quote_p_ = ps->find(',', quote_p_);
-			if(quote_p_ == string::npos)
-				FRM_ERROR_(11);
+			if (quote_p_ == string::npos)
+			{
+				quote_p_ = ps->find(')', quote_p__);
+				if (quote_p_ == string::npos)
+					FRM_ERROR_(11);
+				ps->erase(ps->begin() + quote_p, ps->begin() + quote_p_);
+				goto gt_t_out;
+			}
 			ps->erase(ps->begin() + quote_p, ps->begin() + quote_p_ + 1);
 			goto re_cut_;
 		}
 	}
+gt_t_out:
 	//ÔÙÉ±Ë«¸Ü×¢ÊÍ
 	size_t qpq = ps->find("//");
 	*ps = ps->substr(0, qpq);
