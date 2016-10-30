@@ -1,4 +1,4 @@
-﻿#include "analyser.hpp"
+#include "analyser.hpp"
 #define and &&
 #define or ||
 
@@ -1081,6 +1081,7 @@ void genExpr() {
 	// check start-up char directly.
 	for (int i = 0;i<expr.size();i++) {
 		readbuffer = expr[i];
+		printf("READ CHAR: %c\n",readbuffer);
 		if (readbuffer != 0 and readbuffer != ' ') {
 			if (valid_numbers.find(readbuffer) != string::npos) {
 				if (expr[i - 1] == '@') {
@@ -1260,7 +1261,7 @@ void genExpr() {
 					//printf("oper:%c\n",readbuffer);
 					exprlist->addlast(it);
 				}
-				else if (readbuffer == '_' and readbuffer == '#' and readbuffer == '@') {
+				else if (readbuffer == '_' or readbuffer == '#' or readbuffer == '@') {
 					// do nothing.
 				}
 				else {
