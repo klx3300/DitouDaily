@@ -578,7 +578,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					}
 					else {
 						// all operands are instant value!
-						// that's simple!
+						// that'sexprlist->popfirst() simple!
 						exprlist->get(i - 1)->item.number = (exprlist->get(i - 1)->item.number) + (exprlist->get(i + 1)->item.number);
 					}
 					break;
@@ -913,9 +913,11 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				initexpr.addlast(exprlist->get(i)->item);
 			}
 			exprlist->popfirst();
+			printstack(*exprlist);
 			for (int i = 1;exprlist->get(i)->item.oper != ';';exprlist->popfirst()) {
 				condexpr.addlast(exprlist->get(i)->item);
 			}
+			printstack(condexpr);
 			exprlist->popfirst();
 			for (int i = 1;exprlist->get(i)->item.oper != ')';exprlist->popfirst()) {
 				iterexpr.addlast(exprlist->get(i)->item);
