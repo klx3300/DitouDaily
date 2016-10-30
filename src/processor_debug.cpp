@@ -14,9 +14,9 @@ public:
 	statement() = delete;
 	statement(int i, const std::string &s, STATEMENT_T st) : lineNum(i), text(s), cmdType(st) {}
 public:
-	int lineNum;//行号为负值时，代表无需输出行号
+	int lineNum;
 	string text;
-	STATEMENT_T cmdType;//用于解析器和代码执行器之间进行通讯，减少重复解析
+	STATEMENT_T cmdType;
 };
 #define VIRTUAL_MEMORY_SIZE 256
 using namespace std;
@@ -264,11 +264,11 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_IF:
 		{
+            if(now_state.lineNum>0)
+                print_buffer.push_back(now_state.lineNum);
 			string everyMember;
 			bool flag;
 			int tmpValue;
-			if(now_state.lineNum>0)
-				print_buffer.push_back(now_state.lineNum);
 			ss.clear();
 			ss<<now_state.text;
 			ss>>everyMember;
@@ -314,12 +314,13 @@ int Calc(deque<statement>::iterator &now_it)
 						}
 					}
 				}
+				break;
 			}
-			/*else
+			else
             {
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
-                while(fieldCnt>=Loc_fieldCnt)
+                while(fieldCnt!=Loc_fieldCnt)
                 {
                     ++now_it;
 					if((*now_it).cmdType==S_FIELD_BEGIN)
@@ -327,16 +328,26 @@ int Calc(deque<statement>::iterator &now_it)
 					if((*now_it).cmdType==S_FIELD_END)
 						--fieldCnt;
                 }
-                if((*now_it).cmdType!=S_FIELD_BEGIN)
-                    break;
                 ++now_it;
-                if((*now_it).cmdType!=S_ELSE)
+                if((*now_it).cmdType!=S_FIELD_BEGIN)
+                {
+                    fieldCnt=Loc_fieldCnt+1;
+                    now_it=Loc_now_it;
                     break;
-                while(fieldCnt>=Loc_fieldCnt)
+                }
+                ++now_it;
+                ++fieldCnt;
+                if((*now_it).cmdType!=S_ELSE)
+                {
+                    fieldCnt=Loc_fieldCnt+1;
+                    now_it=Loc_now_it;
+                    break;
+                }
+                while(fieldCnt!=Loc_fieldCnt)
                 {
                     ++now_it;
                     if((*now_it).cmdType!=S_FIELD_BEGIN&&(*now_it).cmdType!=S_FIELD_END)
-                        (*now_it).cmdType=S_BLANK;
+                        (*now_it).cmdType=S_BLANK,(*now_it).lineNum=-1;
                     else
                         if((*now_it).cmdType==S_FIELD_BEGIN)
                             ++fieldCnt;
@@ -345,7 +356,8 @@ int Calc(deque<statement>::iterator &now_it)
                 }
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
-            }*/
+                break;
+            }
 		}
 		case S_ELSE:
 		{
@@ -368,6 +380,18 @@ int processor_main()//If no error occurred, return 0.
 int main()
 {
     buf.clear();
+	/*buf.push_back(statement(1,"int _____@@##1",S_ASSIGN));
+    buf.push_back(statement(2,"",S_FIELD_BEGIN));
+    buf.push_back(statement(3,"1",S_IF));
+    buf.push_back(statement(4,"",S_FIELD_BEGIN));
+    buf.push_back(statement(5,"",S_FIELD_END));
+    buf.push_back(statement(6,"",S_FIELD_END));
+    buf.push_back(statement(7,"",S_FIELD_BEGIN));
+    buf.push_back(statement(8,"",S_ELSE));
+    buf.push_back(statement(9,"",S_FIELD_BEGIN));
+    buf.push_back(statement(10,"_____@@##1 = 1",S_ASSIGN));
+    buf.push_back(statement(11,"",S_FIELD_END));
+    buf.push_back(statement(12,"",S_FIELD_END));*/
 	buf.push_back(statement(1,"int _____@@##1",S_ASSIGN));
 	buf.push_back(statement(2,"int _____@@##2",S_ASSIGN));
     buf.push_back(statement(3,"int _____@@##3",S_ASSIGN));
@@ -400,39 +424,7 @@ int main()
     buf.push_back(statement(12,"_____##@@2",S_IF));
     buf.push_back(statement(13,"",S_BLANK_BUT_OUTPUT));
     buf.push_back(statement(13,"",S_FIELD_END));
-    /*1|S_ASSIGN> int _____##@@1
-    2|S_ASSIGN> int _____##@@2
-    3|S_ASSIGN> int _____##@@3
-    3|S_ASSIGN> _____##@@3 = 1
-    4|S_ASSIGN> _____##@@2 = 5
-    5|S_ASSIGN> _____##@@1 = 1
-    6|S_ASSIGN> _____##@@0 = _____##@@1 + 1
-    6|S_ASSIGN> _____##@@1 = _____##@@0
-    7|S_FIELD_BEGIN>
-    7|S_ASSIGN> _____##@@4 = 0
-    7|S_ASSIGN> _____##@@-998 = 0
-    7|S_GOTO_DEST>
-    7|S_FIELD_BEGIN>
-    7|S_IF> _____##@@-998
-    7|S_ASSIGN> _____##@@-1 = _____##@@4
-    7|S_ASSIGN> _____##@@4 = _____##@@4 + 1
-    7|S_FIELD_END>
-    7|S_ASSIGN> _____##@@-998 = 1
-    7|S_ASSIGN> _____##@@-2 = _____##@@4 < 5
-    7|S_IF> _____##@@-2
-    8|S_FIELD_BEGIN>
-    9|S_BLANK_BUT_OUTPUT>
-    10|S_FIELD_END>
-    10|S_GOTO>
-    10|S_FIELD_END>
-    11|S_BLANK_BUT_OUTPUT>
-    11|S_ASSIGN> _____##@@-3 = _____##@@2
-    11|S_ASSIGN> _____##@@2 = _____##@@2 + 1
-    12|S_FIELD_BEGIN>
-    12|S_IF> _____##@@2
-    13|S_BLANK_BUT_OUTPUT>
-    13|S_FIELD_END>*/
-	processor_main();
+    processor_main();
 	//printf("%d\n",Get_Value(1));
 	//printf("%d\n",Get_Value_Double(-1));
 	for(int i=0;i<print_buffer.size();++i)

@@ -243,11 +243,11 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_IF:
 		{
+            if(now_state.lineNum>0)
+                print_buffer.push_back(now_state.lineNum);
 			string everyMember;
 			bool flag;
 			int tmpValue;
-			if(now_state.lineNum>0)
-				print_buffer.push_back(now_state.lineNum);
 			ss.clear();
 			ss<<now_state.text;
 			ss>>everyMember;
@@ -293,12 +293,13 @@ int Calc(deque<statement>::iterator &now_it)
 						}
 					}
 				}
+				break;
 			}
-			/*else
+			else
             {
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
-                while(fieldCnt>=Loc_fieldCnt)
+                while(fieldCnt!=Loc_fieldCnt)
                 {
                     ++now_it;
 					if((*now_it).cmdType==S_FIELD_BEGIN)
@@ -306,16 +307,26 @@ int Calc(deque<statement>::iterator &now_it)
 					if((*now_it).cmdType==S_FIELD_END)
 						--fieldCnt;
                 }
-                if((*now_it).cmdType!=S_FIELD_BEGIN)
-                    break;
                 ++now_it;
-                if((*now_it).cmdType!=S_ELSE)
+                if((*now_it).cmdType!=S_FIELD_BEGIN)
+                {
+                    fieldCnt=Loc_fieldCnt+1;
+                    now_it=Loc_now_it;
                     break;
-                while(fieldCnt>=Loc_fieldCnt)
+                }
+                ++now_it;
+                ++fieldCnt;
+                if((*now_it).cmdType!=S_ELSE)
+                {
+                    fieldCnt=Loc_fieldCnt+1;
+                    now_it=Loc_now_it;
+                    break;
+                }
+                while(fieldCnt!=Loc_fieldCnt)
                 {
                     ++now_it;
                     if((*now_it).cmdType!=S_FIELD_BEGIN&&(*now_it).cmdType!=S_FIELD_END)
-                        (*now_it).cmdType=S_BLANK;
+                        (*now_it).cmdType=S_BLANK,(*now_it).lineNum=-1;
                     else
                         if((*now_it).cmdType==S_FIELD_BEGIN)
                             ++fieldCnt;
@@ -324,7 +335,8 @@ int Calc(deque<statement>::iterator &now_it)
                 }
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
-            }*/
+                break;
+            }
 		}
 		case S_ELSE:
 		{
@@ -342,3 +354,4 @@ int processor_main()//If no error occurred, return 0.
 		Calc(now_it);
 	return 0;
 }
+
