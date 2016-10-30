@@ -1120,6 +1120,7 @@ void genExpr() {
 					it.type = TYPE_OPER;
 					it.oper = 'J';
 					exprlist->addlast(it);
+					bracketstack.last->item=BRACKET_FLAG_LOOP;
 				}
 				else if (readbuffer == 'w') {
 					i += 4;
