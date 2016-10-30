@@ -363,52 +363,63 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 		exprlist->remove(exprlist->get(end));
 		exprlist->remove(exprlist->get(start));
 	}
-	else if (end - start == 3) {// (-x) pattern
+	else if (end - start == 3) {// (-x) pattern && (x-) pattern
 		exprlist->remove(exprlist->get(end));
-		switch (exprlist->get(st)->item.oper) {
-		case '-':
-			// check variable?
-			if (exprlist->get(ed)->item.type == TYPE_OPERAND_VAR) {
-				// i cant read virtual memory directly,so use tempvars.
-				int srctmpvar = allocTempVar();
-				assignStatement(ln, -srctmpvar, "- " + formatVarName(exprlist->get(ed)->item.number));
-				exprlist->get(ed)->item.number = -srctmpvar;
+		if(exprlist->get(st)->item.type == TYPE_OPER){
+			switch (exprlist->get(st)->item.oper) {
+			case '-':
+				// check variable?
+				if (exprlist->get(ed)->item.type == TYPE_OPERAND_VAR) {
+					// i cant read virtual memory directly,so use tempvars.
+					int srctmpvar = allocTempVar();
+					assignStatement(ln, -srctmpvar, "- " + formatVarName(exprlist->get(ed)->item.number));
+					exprlist->get(ed)->item.number = -srctmpvar;
+				}
+				else {
+					exprlist->get(ed)->item.number = -(exprlist->get(ed)->item.number);
+				}
+				break;
+			default:
+	
+				break;
 			}
-			else {
-				exprlist->get(ed)->item.number = -(exprlist->get(ed)->item.number);
+			exprlist->remove(exprlist->get(start));
+			exprlist->remove(exprlist->get(start));
+		}else{
+			switch (exprlist->get(ed)->item.oper) {
+			case 'd':
+				if (exprlist->get(st)->item.type == TYPE_OPERAND_VAR) {
+					int srctmpvar = allocTempVar();
+					assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(st)->item.number));
+					assignStatement(ln, exprlist->get(st)->item.number, formatVarName(exprlist->get(st)->item.number) + " - 1");
+					exprlist->get(st)->item.number = -srctmpvar;
+				}
+				else {
+					// using -- on an instant value is illegal.
+					// in this case will throw an SyntaxErrorException.
+					// waiting to communicate with lbsjj and modify the mainframe
+				}
+				break;
+			case 'i':
+				if (exprlist->get(st)->item.type == TYPE_OPERAND_VAR) {
+					int srctmpvar = allocTempVar();
+					assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(st)->item.number));
+					assignStatement(ln, exprlist->get(st)->item.number, formatVarName(exprlist->get(st)->item.number) + " + 1");
+					exprlist->get(st)->item.number = -srctmpvar;
+				}
+				else {
+					// using -- on an instant value is illegal.
+					// in this case will throw an SyntaxErrorException.
+					// waiting to communicate with lbsjj and modify the mainframe
+				}
+			default:
+	
+				break;
 			}
-			break;
-		case 'd':
-			if (exprlist->get(ed)->item.type == TYPE_OPERAND_VAR) {
-				int srctmpvar = allocTempVar();
-				assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(ed)->item.number));
-				assignStatement(ln, exprlist->get(ed)->item.number, formatVarName(exprlist->get(ed)->item.number) + " - 1");
-				exprlist->get(ed)->item.number = -srctmpvar;
-			}
-			else {
-				// using -- on an instant value is illegal.
-				// in this case will throw an SyntaxErrorException.
-				// waiting to communicate with lbsjj and modify the mainframe
-			}
-			break;
-		case 'i':
-			if (exprlist->get(ed)->item.type == TYPE_OPERAND_VAR) {
-				int srctmpvar = allocTempVar();
-				assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(ed)->item.number));
-				assignStatement(ln, exprlist->get(ed)->item.number, formatVarName(exprlist->get(ed)->item.number) + " + 1");
-				exprlist->get(ed)->item.number = -srctmpvar;
-			}
-			else {
-				// using -- on an instant value is illegal.
-				// in this case will throw an SyntaxErrorException.
-				// waiting to communicate with lbsjj and modify the mainframe
-			}
-		default:
-
-			break;
+			exprlist->remove(exprlist->get(end-1));
+			exprlist->remove(exprlist->get(start));
 		}
-		exprlist->remove(exprlist->get(start));
-		exprlist->remove(exprlist->get(start));
+		
 	}
 	else {
 		exprlist->remove(exprlist->get(end));
@@ -429,30 +440,32 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					else {
 						exprlist->get(i + 1)->item.number = -(exprlist->get(i + 1)->item.number);
 					}
+					
 					break;
 				case 'd':
-					if (exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
+					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
 						int srctmpvar = allocTempVar();
-						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i + 1)->item.number));
-						assignStatement(ln, exprlist->get(i + 1)->item.number, formatVarName(exprlist->get(i + 1)->item.number) + " - 1");
-						exprlist->get(i + 1)->item.number = -srctmpvar;
+						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
+						assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i - 1)->item.number) + " - 1");
+						exprlist->get(i - 1)->item.number = -srctmpvar;
 					}
 					else {
 						// SyntaxErrorException
 					}
 					break;
 				case 'i':
-					if (exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
+					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
 						int srctmpvar = allocTempVar();
-						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i + 1)->item.number));
-						assignStatement(ln, exprlist->get(i + 1)->item.number, formatVarName(exprlist->get(i + 1)->item.number) + " + 1");
-						exprlist->get(i + 1)->item.number = -srctmpvar;
+						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
+						assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i - 1)->item.number) + " + 1");
+						exprlist->get(i - 1)->item.number = -srctmpvar;
 					}
 					else {
 						// SyntaxErrorException
 					}
 					break;
 				default:
+					
 					break;
 				}
 				exprlist->remove(exprlist->get(i));
