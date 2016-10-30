@@ -220,7 +220,7 @@ void clearTempVarFlags() {
 }
 int allocTempVar() {
 	// search for avaliable tmpvar
-	for (int i = 0;i<256;i++) {
+	for (int i = 1;i<256;i++) {
 		if (tmpvars[i] == false) {
 			tmpvars[i] = true;
 			return i;
