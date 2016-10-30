@@ -1368,7 +1368,9 @@ void genExpr() {
 			//if statement closed,sent to rcalc.
 			if (flag_exprclosed) {
 				printstack(*exprlist);
-				rcalc(exprlist, ln);
+				if(exprlist->popable(){
+					rcalc(exprlist, ln);
+				}
 				delete exprlist;
 				exprlist = new qLinkedList<item>();
 				flag_exprclosed=false;
