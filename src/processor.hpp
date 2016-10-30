@@ -18,8 +18,8 @@ int Give_Value(int Number,int Value)
 {
 	map<int,pair<int,int> >::iterator now=allValue.find(Number);
 	if(now==allValue.end())
-			return -1;
-	(*now).second.second=Value;
+        allValue.insert(make_pair(Number,make_pair(-fieldCnt,Value)));
+    (*now).second.second=Value;
 	return 0;
 }
 
@@ -39,6 +39,7 @@ int Get_Value_Double(int Number)
 
 int Calc(deque<statement>::iterator &now_it)
 {
+    //cout<<(*now_it).text<<endl;
 	statement now_state=(*now_it);
 	switch(now_state.cmdType)
 	{
@@ -293,7 +294,7 @@ int Calc(deque<statement>::iterator &now_it)
 					}
 				}
 			}
-			else
+			/*else
             {
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
@@ -323,7 +324,7 @@ int Calc(deque<statement>::iterator &now_it)
                 }
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
-            }
+            }*/
 		}
 		case S_ELSE:
 		{
