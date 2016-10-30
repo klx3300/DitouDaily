@@ -86,15 +86,17 @@ int Calc(deque<statement>::iterator &now_it)
 			for(deque<statement>::iterator now_it_tmp=now_it;now_it_tmp!=buf.begin();--now_it_tmp)
 			{
 				if((*now_it_tmp).cmdType==S_FIELD_BEGIN)
-					++fieldCnt;
-				if((*now_it_tmp).cmdType==S_FIELD_END)
 					--fieldCnt;
+				if((*now_it_tmp).cmdType==S_FIELD_END)
+					++fieldCnt;
 				if((*now_it_tmp).cmdType==S_GOTO_DEST&&Loc_fieldCnt==fieldCnt)
 				{
 					now_it=now_it_tmp;
 					break;
 				}
 			}
+			fieldCnt=Loc_fieldCnt;
+			break;
 		}
 		case S_ASSIGN:
 		{
