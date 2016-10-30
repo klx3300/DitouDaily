@@ -333,6 +333,22 @@ string high_priority("*/");
 // operator 'n' indicates != operator
 
 
+void printstack(qLinkedList<item> exprlist){
+	for(int i=0;i<exprlist.size();i++){
+		switch(exprlist.get(i)->item.type){
+			case TYPE_NUM:
+				printf("%.2lf",exprlist.get(i)->item.number);
+				break;
+			case TYPE_OPER:
+				printf("%c",exprlist.get(i)->item.oper);
+				break;
+			default:
+				printf("[UNDEF]");
+		}
+	}
+	printf("\n");
+}
+
 
 //bracket-free part
 void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
@@ -1016,7 +1032,21 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		else if (fieldStack.first->item == FIELD_LOOP_TRUE) {
 			// for loops
 			while (fieldStack.first->item == FIELD_NORMAL_TRUE) {
-				gotoStatement(ln);
+				gotoStatement(ln);void printstack(qLinkedList<item> exprlist){
+	for(int i=0;i<exprlist.size();i++){
+		switch(exprlist.get(i)->item.type){
+			case TYPE_NUM:
+				printf("%.2lf",exprlist.get(i)->item.number);
+				break;
+			case TYPE_OPER:
+				printf("%c",exprlist.get(i)->item.oper);
+				break;
+			default:
+				printf("[UNDEF]");
+		}
+	}
+	printf("\n");
+}
 				fieldStatement(ln, S_FIELD_END);
 				fieldStack.popfirst();
 			}
@@ -1240,6 +1270,9 @@ void genExpr() {
 					it.oper = 'n';
 					//printf("oper:%c\n",readbuffer);
 					exprlist->addlast(it);
+				}
+				else if(readbuffer =='_' and readbuffer=='#' and readbuffer=='@'){
+					// do nothing.
 				}
 				else {
 					item it;
