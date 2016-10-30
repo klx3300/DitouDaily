@@ -100,8 +100,6 @@ int Calc(deque<statement>::iterator &now_it)
 		{
 			string everyMember[4];
 			int tmpValue[4];
-			if(now_state.lineNum>0)
-				print_buffer.push_back(now_state.lineNum);
 			ss.clear();
 			ss<<now_state.text;
 			ss>>everyMember[0];
@@ -116,6 +114,8 @@ int Calc(deque<statement>::iterator &now_it)
 			}
 			else
 			{
+                if(now_state.lineNum>0)
+				print_buffer.push_back(now_state.lineNum);
 				ss>>everyMember[1];
 				ss>>everyMember[1];
 				if(ss.eof())
@@ -290,24 +290,6 @@ int Calc(deque<statement>::iterator &now_it)
 					}
 				}
 			}
-			else
-			{
-				int Loc_fieldCnt=fieldCnt;
-				deque<statement>::iterator Loc_now_it=now_it;
-				for(deque<statement>::iterator now_it_tmp=now_it;now_it_tmp!=buf.end();++now_it_tmp)
-				{
-					if((*now_it_tmp).cmdType==S_FIELD_BEGIN)
-						++Loc_fieldCnt;
-					if((*now_it_tmp).cmdType==S_FIELD_END)
-						--Loc_fieldCnt;
-					if((*now_it_tmp).cmdType==S_ELSE&&Loc_fieldCnt==fieldCnt)
-					{
-						now_it=now_it_tmp;
-						break;
-					}
-				}
-				int fieldTemp=0;
-			} 
 		}
 		case S_ELSE:
 		{
