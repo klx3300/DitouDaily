@@ -939,6 +939,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				assignStatement(ln, -998, "1");
 				debracket_process(&condexpr, ln);
 				rebracket_process(&condexpr, ln);
+				printstack(condexpr);
 				ifStatement(ln, condexpr.first->item.number);
 				fieldStack.addfirst(FIELD_LOOP_FALSE);
 			}
