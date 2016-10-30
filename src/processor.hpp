@@ -292,6 +292,37 @@ int Calc(deque<statement>::iterator &now_it)
 					}
 				}
 			}
+			else
+            {
+                int Loc_fieldCnt=fieldCnt-1;
+                deque<statement>::iterator Loc_now_it=now_it;
+                while(fieldCnt>=Loc_fieldCnt)
+                {
+                    ++now_it;
+					if((*now_it).cmdType==S_FIELD_BEGIN)
+						++fieldCnt;
+					if((*now_it).cmdType==S_FIELD_END)
+						--fieldCnt;
+                }
+                if((*now_it).cmdType!=S_FIELD_BEGIN)
+                    break;
+                ++now_it;
+                if((*now_it).cmdType!=S_ELSE)
+                    break;
+                while(fieldCnt>=Loc_fieldCnt)
+                {
+                    ++now_it;
+                    if((*now_it).cmdType!=S_FIELD_BEGIN&&(*now_it).cmdType!=S_FIELD_END)
+                        (*now_it).cmdType=S_BLANK;
+                    else
+                        if((*now_it).cmdType==S_FIELD_BEGIN)
+                            ++fieldCnt;
+                        else
+                            --fieldCnt;
+                }
+                fieldCnt=Loc_fieldCnt+1;
+                now_it=Loc_now_it;
+            }
 		}
 		case S_ELSE:
 		{
