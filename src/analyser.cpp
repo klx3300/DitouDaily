@@ -998,17 +998,17 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			// check if last didn't use } to close field.
 			// true: didn't close normally(using '{' & '}')
 			// and commit close.
-			if (fieldStack.first->item == FIELD_NORMAL_TRUE) {
+			if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 				// didn't close field normally!
 				// close it and pop the stack.
-				while (fieldStack.first->item == FIELD_NORMAL_TRUE) {
+				while (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 					fieldStatement(ln, S_FIELD_END);
 					fieldStack.popfirst();
 				}
 			}
-			else if (fieldStack.first->item == FIELD_LOOP_TRUE) {
+			else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
 				// for loops
-				while (fieldStack.first->item == FIELD_LOOP_TRUE) {
+				while (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
 					gotoStatement(ln);
 					fieldStatement(ln, S_FIELD_END);
 					fieldStack.popfirst();
