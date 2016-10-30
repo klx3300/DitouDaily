@@ -1080,11 +1080,7 @@ void genExpr() {
 	// in case all var names are replaced,
 	// check start-up char directly.
 	for (int i = 0;i<expr.size();i++) {
-		if(expr!=""){
-			readbuffer = expr[i];
-		}else{
-			readbuffer=0;
-		}
+		readbuffer = expr[i];
 		printf("READ CHAR: %c\n",readbuffer);
 		if (readbuffer != 0 and readbuffer != ' ') {
 			if (valid_numbers.find(readbuffer) != string::npos) {
@@ -1290,23 +1286,15 @@ void genExpr() {
 				flag_exprclosed=false;
 			}
 			if (i + 1 >= expr.size() and input_iterator + 1<input_buf.size()) {
-				printf("NEXT LN\n");
-				printf(input_buf[input_iterator+1].text.c_str());
-				printf("\n");
-				input_iterator++;
-				expr = input_buf[input_iterator].text;
-				ln = input_buf[input_iterator].lineNum;
-				i = -1;
-			}
-		}else{
-			if (i + 1 >= expr.size() and input_iterator + 1<input_buf.size()) {
-				printf("NEXT LN\n");
-				printf(input_buf[input_iterator+1].text.c_str());
-				printf("\n");
-				input_iterator++;
-				expr = input_buf[input_iterator].text;
-				ln = input_buf[input_iterator].lineNum;
-				i = -1;
+				do{
+					printf("NEXT LN\n");
+					printf(input_buf[input_iterator+1].text.c_str());
+					printf("\n");
+					input_iterator++;
+					expr = input_buf[input_iterator].text;
+					ln = input_buf[input_iterator].lineNum;
+					i = -1;
+				}while(expr=="");
 			}
 		}
 	}
