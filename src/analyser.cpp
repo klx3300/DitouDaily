@@ -1286,6 +1286,9 @@ void genExpr() {
 				flag_exprclosed=false;
 			}
 			if (i + 1 == expr.size() and input_iterator + 1<input_buf.size()) {
+				printf("NEXT LN\n");
+				printf(input_buf[input_iterator].text.c_str());
+				printf("\n");
 				input_iterator++;
 				expr = input_buf[input_iterator].text;
 				ln = input_buf[input_iterator].lineNum;
