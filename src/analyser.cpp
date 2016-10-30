@@ -1368,7 +1368,7 @@ void genExpr() {
 			//if statement closed,sent to rcalc.
 			if (flag_exprclosed) {
 				printstack(*exprlist);
-				if(exprlist->popable(){
+				if(exprlist->popable()){
 					rcalc(exprlist, ln);
 				}
 				delete exprlist;
