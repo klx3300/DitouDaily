@@ -1,4 +1,4 @@
-#include "analyser.hpp"
+ï»¿#include "analyser.hpp"
 #define and &&
 #define or ||
 
@@ -294,18 +294,18 @@ void breakStatement(int ln) {
 
 
 /* imzhwk created analyser
-* cmdType¶ÔÓ¦textÖÐµÄÄÚÈÝÈçÏÂ£º
-S_ERROR ÎÞÒâÒå
-S_BLANK,ÎÞÒâÒå
-S_BLANK_BUT_OUTPUT,ÎÞÒâÒå
-S_ASSIGN,ÍêÕûµÄÒ»ÐÐÓï¾ä×Ö·û´®£¬²»º¬¶ººÅ·ÖºÅ
-S_FIELD_BEGIN,ÎÞÒâÒå
-S_FIELD_END,ÎÞÒâÒå
-S_GOTO,Ä¿±êGOTO_DEST½á¹¹ÖÐÄÇ¸öÌØÊâµÄlineNumµÄÖµ(±ØÐëÎª¸º)
-S_GOTO_DEST,ÎÞÒâÒå
-S_IF,ifÀ¨ºÅÄÚµÄÄÇ¸öÊ½×Ó
-S_ELSE_IF,ifÀ¨ºÅÄÚµÄÄÇ¸öÊ½×Ó
-S_ELSE,ÎÞÒâÒå
+* cmdTypeï¿½ï¿½Ó¦textï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â£ï¿½
+S_ERROR ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+S_BLANK,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+S_BLANK_BUT_OUTPUT,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+S_ASSIGN,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å·Öºï¿½
+S_FIELD_BEGIN,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+S_FIELD_END,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+S_GOTO,Ä¿ï¿½ï¿½GOTO_DESTï¿½á¹¹ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½lineNumï¿½ï¿½Öµ(ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½)
+S_GOTO_DEST,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+S_IF,ifï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½Ç¸ï¿½Ê½ï¿½ï¿½
+S_ELSE_IF,ifï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½Ç¸ï¿½Ê½ï¿½ï¿½
+S_ELSE,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 */
 
 
@@ -313,7 +313,7 @@ const int TYPE_OPER = 1;
 const int TYPE_OPERAND = 2;
 const int TYPE_OPERAND_VAR = 3;
 
-/*ÌáÐÑ£ºÓÐº¬ÒåµÄÔ¤Áô¹Ø¼ü´ÊÓÐ
+/*ï¿½ï¿½ï¿½Ñ£ï¿½ï¿½Ðºï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½ï¿½ï¿½
 int if else for break while do \r\n \t printf return
 + - * / ++ --
 > < = == >= <= !=
@@ -333,17 +333,20 @@ string high_priority("*/");
 // operator 'n' indicates != operator
 
 
-void printstack(qLinkedList<item> exprlist){
-	for(int i=0;i<exprlist.size();i++){
-		switch(exprlist.get(i)->item.type){
-			case TYPE_NUM:
-				printf("%.2lf",exprlist.get(i)->item.number);
-				break;
-			case TYPE_OPER:
-				printf("%c",exprlist.get(i)->item.oper);
-				break;
-			default:
-				printf("[UNDEF]");
+void printstack(qLinkedList<item> exprlist) {
+	for (int i = 0;i<exprlist.size();i++) {
+		switch (exprlist.get(i)->item.type) {
+		case TYPE_OPERAND:
+			printf("%d", exprlist.get(i)->item.number);
+			break;
+		case TYPE_OPERAND_VAR:
+			printf("_____##@@%d", exprlist.get(i)->item.number);
+			break;
+		case TYPE_OPER:
+			printf("%c", exprlist.get(i)->item.oper);
+			break;
+		default:
+			printf("[UNDEF]");
 		}
 	}
 	printf("\n");
@@ -1063,7 +1066,7 @@ void genExpr() {
 	// convert deque input_buf into a single string.
 	string expr("");
 	int ln = 1;
-	int input_iterator=0;
+	int input_iterator = 0;
 	expr = input_buf[input_iterator].text;
 	char readbuffer = 0;
 	int for_comment = 0;
@@ -1257,7 +1260,7 @@ void genExpr() {
 					//printf("oper:%c\n",readbuffer);
 					exprlist->addlast(it);
 				}
-				else if(readbuffer =='_' and readbuffer=='#' and readbuffer=='@'){
+				else if (readbuffer == '_' and readbuffer == '#' and readbuffer == '@') {
 					// do nothing.
 				}
 				else {
@@ -1270,6 +1273,7 @@ void genExpr() {
 			}
 			//if statement closed,sent to rcalc.
 			if (flag_exprclosed) {
+				printstack(*exprlist);
 				rcalc(exprlist, ln);
 				delete exprlist;
 				exprlist = new qLinkedList<item>();
@@ -1277,7 +1281,7 @@ void genExpr() {
 			if (i + 1 == expr.size() and input_iterator + 1<input_buf.size()) {
 				input_iterator++;
 				expr = input_buf[input_iterator].text;
-				ln=input_buf[input_iterator].linenum;
+				ln = input_buf[input_iterator].lineNum;
 				i = -1;
 			}
 		}
