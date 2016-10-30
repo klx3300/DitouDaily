@@ -1213,4 +1213,5 @@ void genExpr(){
 int analyse_main(){
     // deque<statement> buf is input global var
     // all un-analysed statement is typed as S_ERROR
+	genExpr();
 }
