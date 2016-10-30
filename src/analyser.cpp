@@ -1046,8 +1046,9 @@ const int BRACKET_FLAG_NOLOOP = -1, BRACKET_FLAG_LOOP = 0, BRACKET_FLAG = 1;
 void genExpr() {
 	// convert deque input_buf into a single string.
 	string expr("");
-	int ln = 0;
-	expr = input_buf[ln].text;
+	int ln = 1;
+	int input_iterator=0;
+	expr = input_buf[input_iterator].text;
 	char readbuffer = 0;
 	int for_comment = 0;
 	string numberbuffer;
@@ -1254,9 +1255,10 @@ void genExpr() {
 				delete exprlist;
 				exprlist = new qLinkedList<item>();
 			}
-			if (i + 1 == expr.size() and ln + 1<input_buf.size()) {
-				ln++;
-				expr = input_buf[ln].text;
+			if (i + 1 == expr.size() and input_iterator + 1<input_buf.size()) {
+				input_iterator++;
+				expr = input_buf[input_iterator].text;
+				ln=input_buf[input_iterator].linenum;
 				i = -1;
 			}
 		}
