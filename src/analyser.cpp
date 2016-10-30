@@ -861,9 +861,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			}
 			break;
 		case 'W':
-			if (fieldStack.popable() && fieldStack.first->item != FIELD_DLOOP) {
+			if (!fieldStack.popable() || fieldStack.first->item != FIELD_DLOOP) {
 				// not a do-while loop!
-				exprlist->popfirst();
 				fieldStatement(ln, S_FIELD_BEGIN);
 				if (exprlist->last->item.oper == '{') {
 					exprlist->poplast();
