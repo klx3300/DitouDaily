@@ -985,9 +985,22 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				// close it and pop the stack.
 				fieldStatement(ln, S_FIELD_END);
 				fieldStack.popfirst();
-				while (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
-					fieldStatement(ln, S_FIELD_END);
-					fieldStack.popfirst();
+				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+					switch(fieldStack.first->item){
+						case FIELD_NORMAL_TRUE:
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						case FIELD_LOOP_TRUE:
+							gotoStatement(ln);
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						default:
+							
+							break;
+					}
+					
 				}
 			}
 			else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_FALSE) {
@@ -995,10 +1008,22 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				gotoStatement(ln);
 				fieldStatement(ln, S_FIELD_END);
 				fieldStack.popfirst();
-				while (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
-					gotoStatement(ln);
-					fieldStatement(ln, S_FIELD_END);
-					fieldStack.popfirst();
+				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+					switch(fieldStack.first->item){
+						case FIELD_NORMAL_TRUE:
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						case FIELD_LOOP_TRUE:
+							gotoStatement(ln);
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						default:
+							
+							break;
+					}
+					
 				}
 			}
 			break;
@@ -1013,17 +1038,42 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 				// didn't close field normally!
 				// close it and pop the stack.
-				while (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
-					fieldStatement(ln, S_FIELD_END);
-					fieldStack.popfirst();
+				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+					switch(fieldStack.first->item){
+						case FIELD_NORMAL_TRUE:
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						case FIELD_LOOP_TRUE:
+							gotoStatement(ln);
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						default:
+							
+							break;
+					}
+					
 				}
 			}
 			else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
 				// for loops
-				while (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
-					gotoStatement(ln);
-					fieldStatement(ln, S_FIELD_END);
-					fieldStack.popfirst();
+				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+					switch(fieldStack.first->item){
+						case FIELD_NORMAL_TRUE:
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						case FIELD_LOOP_TRUE:
+							gotoStatement(ln);
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						default:
+							
+							break;
+					}
+					
 				}
 			}
 			break;
@@ -1039,18 +1089,43 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 			// didn't close field normally!
 			// close it and pop the stack.
-			while (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
-				fieldStatement(ln, S_FIELD_END);
-				fieldStack.popfirst();
-			}
+			while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+					switch(fieldStack.first->item){
+						case FIELD_NORMAL_TRUE:
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						case FIELD_LOOP_TRUE:
+							gotoStatement(ln);
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						default:
+							
+							break;
+					}
+					
+				}
 		}
 		else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
 			// for loops
-			while (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
-				gotoStatement(ln);
-				fieldStatement(ln, S_FIELD_END);
-				fieldStack.popfirst();
-			}
+			while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+					switch(fieldStack.first->item){
+						case FIELD_NORMAL_TRUE:
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						case FIELD_LOOP_TRUE:
+							gotoStatement(ln);
+							fieldStatement(ln, S_FIELD_END);
+							fieldStack.popfirst();
+						break;
+						default:
+							
+							break;
+					}
+					
+				}
 		}
 	}
 
