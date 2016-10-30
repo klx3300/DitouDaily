@@ -1,3 +1,4 @@
+#pragma once 
 #include<sstream>
 #include<map>
 #include"stdafx_.hpp"
