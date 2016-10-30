@@ -1283,6 +1283,7 @@ void genExpr() {
 				rcalc(exprlist, ln);
 				delete exprlist;
 				exprlist = new qLinkedList<item>();
+				flag_exprclosed=false;
 			}
 			if (i + 1 == expr.size() and input_iterator + 1<input_buf.size()) {
 				input_iterator++;
