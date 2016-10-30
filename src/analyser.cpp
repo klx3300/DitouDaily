@@ -742,6 +742,32 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					}
 					break;
 				default:
+					//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
+					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR && exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
+						int srctmpvar = allocTempVar();
+						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number) + " "+exprlist->get(i)->item.oper+" " + formatVarName(exprlist->get(i + 1)->item.number));
+						exprlist->get(i - 1)->item.number = -srctmpvar;
+					}
+					else if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
+						int srctmpvar = allocTempVar();
+						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number) + " "+exprlist->get(i)->item.oper+" " + itos(exprlist->get(i + 1)->item.number));
+						exprlist->get(i - 1)->item.number = -srctmpvar;
+					}
+					else if (exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
+						int srctmpvar = allocTempVar();
+						assignStatement(ln, -srctmpvar, itos(exprlist->get(i - 1)->item.number) + " "+exprlist->get(i)->item.oper+" " + formatVarName(exprlist->get(i + 1)->item.number));
+						exprlist->get(i - 1)->item.number = -srctmpvar;
+						exprlist->get(i - 1)->item.type = TYPE_OPERAND_VAR;
+					}
+					else {
+						// all operands are instant value!
+						// that's simple!
+						int srctmpvar = allocTempVar();
+						assignStatement(ln, -srctmpvar, itos(exprlist->get(i - 1)->item.number) + " "+exprlist->get(i)->item.oper+" " + itos(exprlist->get(i + 1)->item.number));
+						exprlist->get(i - 1)->item.number = -srctmpvar;
+						exprlist->get(i - 1)->item.type = TYPE_OPERAND_VAR;
+					}
+					break;
 					break;
 				}
 				exprlist->remove(exprlist->get(i));
