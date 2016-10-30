@@ -66,23 +66,21 @@ int main()
 	{
 		cout << input_buf[cter].lineNum << "> " << input_buf[cter].text << endl;
 	}
-	cout << "********************************" << endl;
+	cout << "********************************\nNow try to launch Compiler...\n" << endl;
 #endif
 	int analyse_error_code = analyse_main();
 #ifdef RECOLIC_DEBUG
-	cout << "**********" << analyse_error_code << endl;
 	for (size_t cter = 0;cter < buf.size();++cter)
 	{
 		cout << buf[cter].lineNum << "|Type=" << buf[cter].cmdType << "> " << buf[cter].text << endl;
 	}
+	cout << "Now try to launch CPU...\n" << endl;
 #endif
 	if (analyse_error_code)
 		ANA_ERROR(analyse_error_code);
-	cout << "**********" << analyse_error_code << "Now CPU start." << endl;
 	int processor_error_code = processor_main();
 	if (processor_error_code)
 		CPU_ERROR(processor_error_code);
-	cout << "**********" << processor_error_code << endl;
 	{ //Final deal
 		int last_success = -1;
 		stringstream ss;
@@ -97,7 +95,7 @@ int main()
 		string too = ss.str();
 		too = too.substr(0, too.size() - 1);
 #ifdef RECOLIC_DEBUG
-		cout << endl << "Result is here:" << too << endl;
+		cout << "\nResult is here:" << too << endl;
 #endif
 		ofstream os("D:\\visual studio 2015\\SeedCup2016\\Debug\\output.txt", ios::out);
 		os << too;
