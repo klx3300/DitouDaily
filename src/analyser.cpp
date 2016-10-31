@@ -213,6 +213,9 @@ item::item() {
 //void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber);
 int currIndex = 0; // now analysis pointer position
 bool tmpvars[65536];
+
+//qLinkedList<bool *variables> vstack
+
 void clearTempVarFlags() {
 	for (int i = 0;i<256;i++) {
 		tmpvars[i] = false;
@@ -376,7 +379,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					exprlist->get(ed)->item.number = -srctmpvar;
 				}
 				else {
-					exprlist->get(ed)->item.number = -(exprlist->get(ed)->item.number);
+// // 					exprlist->get(ed)->item.number = -(exprlist->get(ed)->item.number);
 				}
 				break;
 			default:
@@ -877,6 +880,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 	if (exprlist->first->item.type == TYPE_OPER) {
 		switch (exprlist->first->item.oper) {
 		case 'D':
+			//for(int i=0;exprlist.get(i)!=NULL
 			defineStatement(ln, exprlist->first->next->item.number);
 			exprlist->popfirst();
 			debracket_process(exprlist, ln);
@@ -1025,9 +1029,10 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			printStatement(ln);
 			break;
 		case 'E':
-			elseStatement(ln);
 			fieldStatement(ln, S_FIELD_BEGIN);
 			fieldStack.addfirst(FIELD_NORMAL_TRUE);
+			elseStatement(ln);
+			
 			break;
 		case 'B':
 			breakStatement(ln);
