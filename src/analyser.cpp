@@ -916,10 +916,7 @@ const int FIELD_NORMAL_TRUE = 0, FIELD_NORMAL_FALSE = 1, FIELD_LOOP_TRUE = 2, FI
 qLinkedList<int> fieldStack;
 
 void check_stack_closure_normal(int ln){
-	if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
-		fieldStatement(ln, S_FIELD_END);
-		fieldStack.popfirst();
-	}
+	
 	if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 		// didn't close field normally!
 		// close it and pop the stack.
@@ -941,7 +938,10 @@ void check_stack_closure_normal(int ln){
 					
 					break;
 			}
-					
+		}
+		while(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+			fieldStatement(ln, S_FIELD_END);
+			fieldStack.popfirst();
 		}
 	}
 	else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
@@ -1139,6 +1139,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		}
 		break;
 		case 'P':
+			
 			printStatement(ln);
 			check_stack_closure_normal(ln);
 			break;
@@ -1168,7 +1169,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				// close it and pop the stack.
 				fieldStatement(ln, S_FIELD_END);
 				fieldStack.popfirst();
-				if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+				while(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
 					fieldStatement(ln, S_FIELD_END);
 					fieldStack.popfirst();
 				}
