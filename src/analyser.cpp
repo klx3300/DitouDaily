@@ -915,6 +915,57 @@ const int FIELD_NORMAL_TRUE = 0, FIELD_NORMAL_FALSE = 1, FIELD_LOOP_TRUE = 2, FI
 
 qLinkedList<int> fieldStack;
 
+void check_stack_closure_normal(int ln){
+	if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+		fieldStatement(ln, S_FIELD_END);
+		fieldStack.popfirst();
+	}
+	if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
+		// didn't close field normally!
+		// close it and pop the stack.
+		fieldStatement(ln, S_FIELD_END);
+		fieldStack.popfirst();
+		
+		while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+			switch(fieldStack.first->item){
+				case FIELD_NORMAL_TRUE:
+					fieldStatement(ln, S_FIELD_END);
+					fieldStack.popfirst();
+				break;
+				case FIELD_LOOP_TRUE:
+					gotoStatement(ln);
+					fieldStatement(ln, S_FIELD_END);
+					fieldStack.popfirst();
+				break;
+				default:
+					
+					break;
+			}
+					
+		}
+	}
+	else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
+		// for loops
+		while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
+			switch(fieldStack.first->item){
+				case FIELD_NORMAL_TRUE:
+					fieldStatement(ln, S_FIELD_END);
+					fieldStack.popfirst();
+				break;
+				case FIELD_LOOP_TRUE:
+					gotoStatement(ln);
+					fieldStatement(ln, S_FIELD_END);
+					fieldStack.popfirst();
+				break;
+				default:
+					
+					break;
+			}
+			
+		}
+	}
+}
+
 void rcalc(qLinkedList<item> *exprlist, int ln) {
 	/* possible sing_line expressions are:
 	* D varname = expression(or just close)
@@ -937,6 +988,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			printstack(*exprlist);
 			debracket_process(exprlist, ln);
 			rebracket_process(exprlist, ln);
+			check_stack_closure_normal(ln);
 			break;
 		case 'J':
 			exprlist->popfirst();
@@ -1088,6 +1140,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		break;
 		case 'P':
 			printStatement(ln);
+			check_stack_closure_normal(ln);
 			break;
 		case 'E':
 			fieldStatement(ln, S_FIELD_BEGIN);
@@ -1097,6 +1150,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			break;
 		case 'B':
 			breakStatement(ln);
+			check_stack_closure_normal(ln);
 			break;
 		case 'o':
 			fieldStack.addfirst(FIELD_DLOOP);
@@ -1165,56 +1219,11 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			// but we still have to execute it due to the fucking requirements!
 			debracket_process(exprlist, ln);
 			rebracket_process(exprlist, ln);
+			check_stack_closure_normal(ln);
 			// check if last didn't use } to close field.
 			// true: didn't close normally(using '{' & '}')
 			// and commit close.
-			if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
-				// didn't close field normally!
-				// close it and pop the stack.
-				fieldStatement(ln, S_FIELD_END);
-				fieldStack.popfirst();
-				if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
-					fieldStatement(ln, S_FIELD_END);
-					fieldStack.popfirst();
-				}
-				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
-					switch(fieldStack.first->item){
-						case FIELD_NORMAL_TRUE:
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						case FIELD_LOOP_TRUE:
-							gotoStatement(ln);
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						default:
-							
-							break;
-					}
-					
-				}
-			}
-			else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
-				// for loops
-				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
-					switch(fieldStack.first->item){
-						case FIELD_NORMAL_TRUE:
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						case FIELD_LOOP_TRUE:
-							gotoStatement(ln);
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						default:
-							
-							break;
-					}
-					
-				}
-			}
+			
 			break;
 		}
 	}
@@ -1225,53 +1234,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		// check if last didn't use } to close field.
 		// true: didn't close normally(using '{' & '}')
 		// and commit close.
-		if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
-			// didn't close field normally!
-			// close it and pop the stack.
-			fieldStatement(ln, S_FIELD_END);
-			fieldStack.popfirst();
-			if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
-				fieldStatement(ln, S_FIELD_END);
-				fieldStack.popfirst();
-			}
-			while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
-					switch(fieldStack.first->item){
-						case FIELD_NORMAL_TRUE:
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						case FIELD_LOOP_TRUE:
-							gotoStatement(ln);
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						default:
-							
-							break;
-					}
-					
-				}
-		}
-		else if (fieldStack.popable() && fieldStack.first->item == FIELD_LOOP_TRUE) {
-			// for loops
-			while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
-					switch(fieldStack.first->item){
-						case FIELD_NORMAL_TRUE:
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						case FIELD_LOOP_TRUE:
-							gotoStatement(ln);
-							fieldStatement(ln, S_FIELD_END);
-							fieldStack.popfirst();
-						break;
-						default:
-							
-							break;
-					}
-					
-				}
-		}
+		check_stack_closure_normal(ln);
 	}
 	clearTempVarFlags();
 }
