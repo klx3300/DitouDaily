@@ -8,6 +8,9 @@ int fieldCnt=0;//count how many field it has
 
 void New_Value(int Number)
 {
+    map<int,pair<int,int> >::iterator now=allValue.find(Number);
+    if(now!=allValue.end()&&(*now).second.first==fieldCnt)
+        return;
 	allValue.insert(make_pair(Number,make_pair(-fieldCnt,0)));
 }
 
@@ -292,7 +295,7 @@ int Calc(deque<statement>::iterator &now_it)
 				}
 				break;
 			}
-			/*else
+			else
             {
                 //printf("go into else\n");
                 int Loc_fieldCnt=fieldCnt-1;
@@ -343,7 +346,7 @@ int Calc(deque<statement>::iterator &now_it)
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
                 break;
-            }*/
+            }
 		}
 		case S_ELSE:
 		{

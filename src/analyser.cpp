@@ -880,8 +880,10 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 	if (exprlist->first->item.type == TYPE_OPER) {
 		switch (exprlist->first->item.oper) {
 		case 'D':
-			//for(int i=0;exprlist.get(i)!=NULL
-			defineStatement(ln, exprlist->first->next->item.number);
+			for(int i=0;exprlist->get(i)!=NULL;i++){
+				if(exprlist->get(i)->item.type==TYPE_OPERAND_VAR)
+					defineStatement(ln, exprlist->get(i)->item.number);
+			}
 			exprlist->popfirst();
 			debracket_process(exprlist, ln);
 			rebracket_process(exprlist, ln);
@@ -983,8 +985,9 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			fieldStatement(ln, S_FIELD_BEGIN);
 			if (exprlist->last->item.oper == '{') {
 				exprlist->poplast();
-				debracket_process(&initexpr, ln);
-				rebracket_process(&initexpr, ln);
+				if(initexpr.popable()){
+					rcalc(&initexpr,ln);
+				}
 				assignStatement(ln, -998, "0");
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
@@ -1004,8 +1007,9 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				fieldStack.addfirst(FIELD_LOOP_FALSE);
 			}
 			else {
-				debracket_process(&initexpr, ln);
-				rebracket_process(&initexpr, ln);
+				if(initexpr.popable()){
+					rcalc(&initexpr,ln);
+				}
 				assignStatement(ln, -998, "0");
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
