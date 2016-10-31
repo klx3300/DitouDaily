@@ -14,10 +14,10 @@
 #include "analyser.hpp"
 #include "processor.hpp"
 
-#define FRM_ERROR(error_code) { cout << "\nSoftware exception occurred at recolic_main():Error code is " << error_code << endl; system("pause"); return error_code; }
-#define FRM_ERROR_(error_code) { cout << "\nSoftware exception occurred at recolic_main.cpp:Error code is " << error_code << endl; system("pause"); exit(error_code); }
-#define ANA_ERROR(error_code) { cout << "\Software exception occurred at analyse_main():Error code is " << error_code << endl; system("pause"); return error_code; }
-#define CPU_ERROR(error_code) { cout << "\Software exception occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
+//#define FRM_ERROR(error_code) { cout << "\nSoftware exception occurred at recolic_main():Error code is " << error_code << endl; system("pause"); return error_code; }
+//#define FRM_ERROR_(error_code) { cout << "\nSoftware exception occurred at recolic_main.cpp:Error code is " << error_code << endl; system("pause"); exit(error_code); }
+//#define ANA_ERROR(error_code) { cout << "\Software exception occurred at analyse_main():Error code is " << error_code << endl; system("pause"); return error_code; }
+//#define CPU_ERROR(error_code) { cout << "\Software exception occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define RECOLIC_DEBUG
 
 #ifdef _WIN32
@@ -29,7 +29,7 @@ deque<statement> input_buf;
 deque<statement> buf;
 vector<int> print_buffer;
 int *pMemory = nullptr;
-void __cdecl global_new_handler();
+//void __cdecl global_new_handler();
 
 namespace recolic_frame
 {
@@ -76,10 +76,10 @@ namespace recolic_frame
 
 int main()
 {
-		set_new_handler(global_new_handler);
-		ifstream ifs("D:\\visual studio 2015\\SeedCup2016\\Debug\\input.txt");
-		if (!ifs)
-			FRM_ERROR(3);
+		//set_new_handler(global_new_handler);
+		ifstream ifs("input.txt");
+		//if (!ifs)
+			//FRM_ERROR(3);
 		char frm_tmp_buf[256] = { 0 };
 		string frm_tmp_buf_;
 		ifs.getline(frm_tmp_buf, 256);
@@ -114,11 +114,11 @@ int main()
 		}
 		cout << "Now try to launch CPU...\n" << endl;
 #endif
-		if (analyse_error_code)
-			ANA_ERROR(analyse_error_code);
+		//if (analyse_error_code)
+		//	ANA_ERROR(analyse_error_code);
 		int processor_error_code = processor_main();
-		if (processor_error_code)
-			CPU_ERROR(processor_error_code);
+		//if (processor_error_code)
+		//	CPU_ERROR(processor_error_code);
 		{ //Final deal
 			int last_success = -1;
 			stringstream ss;
@@ -135,7 +135,7 @@ int main()
 #ifdef RECOLIC_DEBUG
 			cout << "\nResult is here:" << too << endl;
 #endif
-			ofstream os("D:\\visual studio 2015\\SeedCup2016\\Debug\\output.txt", ios::out);
+			ofstream os("output.txt", ios::out);
 			os << too;
 			os.close();
 		}
@@ -186,28 +186,25 @@ re_cut_:
 	{
 		size_t quote_p_ = ps->find('"', quote_p + 1);
 		const size_t quote_p__ = quote_p_;
-		if (quote_p_ == string::npos)
-		{
-			FRM_ERROR_(5);
-		}
-		else
-		{
-			quote_p_ = ps->find(',', quote_p_);
-			if (quote_p_ == string::npos)
-			{
-				quote_p_ = ps->find(')', quote_p__);
-				if (quote_p_ == string::npos)
-					FRM_ERROR_(11);
-				ps->erase(ps->begin() + quote_p, ps->begin() + quote_p_);
-				goto gt_t_out;
-			}
-			ps->erase(ps->begin() + quote_p, ps->begin() + quote_p_ + 1);
-			goto re_cut_;
-		}
+		//if (quote_p_ == string::npos)
+		//{
+		//	FRM_ERROR_(5);
+		//}
+        quote_p_ = ps->find(',', quote_p_);
+        if (quote_p_ == string::npos)
+        {
+            quote_p_ = ps->find(')', quote_p__);
+            //if (quote_p_ == string::npos)
+            //	FRM_ERROR_(11);
+            ps->erase(ps->begin() + quote_p, ps->begin() + quote_p_);
+            goto gt_t_out;
+        }
+        ps->erase(ps->begin() + quote_p, ps->begin() + quote_p_ + 1);
+        goto re_cut_;
 	}
-gt_t_out:
+    gt_t_out:
+size_t qpq = ps->find("//");
 	//再杀双杠注释
-	size_t qpq = ps->find("//");
 	*ps = ps->substr(0, qpq);
 	//杀光\t\r完事
 	auto last_it = remove_if(ps->begin(), ps->end(), [](char ch) -> bool { return ch == '\t' || ch == '\r'; });
@@ -289,12 +286,12 @@ size_t recolic_frame::format_var_name(string *ps)
 	return max_var_num;
 }
 
-void __cdecl global_new_handler()
-{
-cout << "\nERROR:bad_alloc occurred! You need more memory!" << endl;
-system("pause");
-exit(1);
-}
+//void __cdecl global_new_handler()
+//{
+//    cout << "\nERROR:bad_alloc occurred! You need more memory!" << endl;
+//    system("pause");
+//    exit(1);
+//}
 
 #define I(ch) ||ich==ch
 std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
