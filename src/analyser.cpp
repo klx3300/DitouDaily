@@ -1224,7 +1224,7 @@ const int BRACKET_FLAG_NOLOOP = -1, BRACKET_FLAG_LOOP = 0, BRACKET_FLAG = 1;
 void genExpr() {
 	// convert deque input_buf into a single string.
 	string expr("");
-	int ln = 1;
+	int ln = input_buf[0].lineNum;
 	int input_iterator = 0;
 	expr = input_buf[input_iterator].text;
 	char readbuffer = 0;
@@ -1398,7 +1398,7 @@ void genExpr() {
 					i++;
 					item it;
 					it.type = TYPE_OPER;
-					it.oper = 'L';
+					it.oper = 'L';;
 					//printf("oper:%c\n",readbuffer);
 					exprlist->addlast(it);
 				}
@@ -1440,9 +1440,13 @@ void genExpr() {
 			//if statement closed,sent to rcalc.
 			if (flag_exprclosed) {
 				printstack(*exprlist);
-				if(exprlist->popable()){
-					rcalc(exprlist, ln);
+				if(!exprlist->popable()){
+					item it;
+					it.type = TYPE_OPERAND;
+					it.number=1;
+					exprlist->addlast(it);
 				}
+				rcalc(exprlist, ln);
 				delete exprlist;
 				exprlist = new qLinkedList<item>();
 				flag_exprclosed=false;
