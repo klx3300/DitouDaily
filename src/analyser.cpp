@@ -911,7 +911,7 @@ void rebracket_process(qLinkedList<item> *exprlist, int ln) {
 // when sent in,';' in the end of statement is removed!
 
 // true: didn't close normally(using '{' & '}')
-const int FIELD_NORMAL_TRUE = 0, FIELD_NORMAL_FALSE = 1, FIELD_LOOP_TRUE = 2, FIELD_LOOP_FALSE = 3, FIELD_DLOOP = 4;
+const int FIELD_NORMAL_TRUE = 0, FIELD_NORMAL_FALSE = 1, FIELD_LOOP_TRUE = 2, FIELD_LOOP_FALSE = 3, FIELD_DLOOP = 4,FIELD_ELSE=5;
 
 qLinkedList<int> fieldStack;
 
@@ -1091,7 +1091,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			break;
 		case 'E':
 			fieldStatement(ln, S_FIELD_BEGIN);
-			fieldStack.addfirst(FIELD_NORMAL_TRUE);
+			fieldStack.addfirst(FIELD_ELSE);
 			elseStatement(ln);
 			
 			break;
@@ -1114,6 +1114,10 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				// close it and pop the stack.
 				fieldStatement(ln, S_FIELD_END);
 				fieldStack.popfirst();
+				if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+					fieldStatement(ln, S_FIELD_END);
+					fieldStack.popfirst();
+				}
 				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
 					switch(fieldStack.first->item){
 						case FIELD_NORMAL_TRUE:
@@ -1167,6 +1171,12 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 				// didn't close field normally!
 				// close it and pop the stack.
+				fieldStatement(ln, S_FIELD_END);
+				fieldStack.popfirst();
+				if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+					fieldStatement(ln, S_FIELD_END);
+					fieldStack.popfirst();
+				}
 				while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
 					switch(fieldStack.first->item){
 						case FIELD_NORMAL_TRUE:
@@ -1218,6 +1228,12 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 			// didn't close field normally!
 			// close it and pop the stack.
+			fieldStatement(ln, S_FIELD_END);
+			fieldStack.popfirst();
+			if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+				fieldStatement(ln, S_FIELD_END);
+				fieldStack.popfirst();
+			}
 			while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
 					switch(fieldStack.first->item){
 						case FIELD_NORMAL_TRUE:
