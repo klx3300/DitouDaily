@@ -302,7 +302,7 @@ int Calc(deque<statement>::iterator &now_it)
 				}
 				break;
 			}
-			else
+			/*else
             {
                 //printf("go into else\n");
                 int Loc_fieldCnt=fieldCnt-1;
@@ -353,7 +353,7 @@ int Calc(deque<statement>::iterator &now_it)
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
                 break;
-            }
+            }*/
 		}
 		case S_ELSE:
 		{
