@@ -9,7 +9,7 @@ int fieldCnt=0;//count how many field it has
 void New_Value(int Number)
 {
     map<int,pair<int,int> >::iterator now=allValue.find(Number);
-    if(now!=allValue.end()&&(*now).second.first==fieldCnt)
+    if(now!=allValue.end()&&(*now).second.first!=fieldCnt)
         return;
 	allValue.insert(make_pair(Number,make_pair(-fieldCnt,0)));
 }
@@ -17,9 +17,10 @@ void New_Value(int Number)
 int Give_Value(int Number,int Value)
 {
 	map<int,pair<int,int> >::iterator now=allValue.find(Number);
-	if(now==allValue.end())
+	if(now==allValue.end()||(*now).second.first!=fieldCnt)
         allValue.insert(make_pair(Number,make_pair(-fieldCnt,Value)));
-    (*now).second.second=Value;
+    else
+        (*now).second.second=Value;
 	return 0;
 }
 
@@ -63,18 +64,23 @@ int Calc(deque<statement>::iterator &now_it)
 		case S_FIELD_BEGIN:
 		{
 			++fieldCnt;
+            //printf("fieldbegin\n");
 			break;
 		}
 		case S_FIELD_END:
 		{
 			--fieldCnt;
 			map<int,pair<int,int> >::iterator tmp;
+            //printf("fieldend\n");
 			for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
 			{
+                //printf("erasefor\n");
+                //printf("%d %d %d\n",(*now).first,(*now).second.first,(*now).second.second);
 				if((*now).second.first<-fieldCnt)
 				{
 					tmp=now;
 					++now;
+                    //printf("erase\n");
 					allValue.erase(tmp);
 				}
 				else	
