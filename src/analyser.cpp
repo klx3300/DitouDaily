@@ -1,6 +1,6 @@
 #include "analyser.hpp"
-#define and &&
-#define or ||
+//#define and &&
+//#define or ||
 
 string itos(int i) {
 	ostringstream os;
