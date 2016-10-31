@@ -425,10 +425,45 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 		
 	}
 	else {
-		exprlist->remove(exprlist->get(end));
+		//exprlist->remove(exprlist->get(end));
 		// check unary
-		for (int i = st;i <= ed - 1;i++) {
-
+		for (int i = st;i <= ed;i++) {
+			if(exprlist->get(i)->item.type==TYPE_OPER)
+				printf("PROC OPER:%c\n",exprlist->get(i)->item.oper);
+			else
+				printf("PROC NUMB:%d\n",exprlist->get(i)->item.number);
+			if (exprlist->get(i)->prev->item.type == TYPE_OPERAND_VAR and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type != TYPE_OPERAND or exprlist->get(i)->next->item.type != TYPE_OPERAND_VAR)) {
+				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
+				ed--;
+				switch (exprlist->get(i)->item.oper) {
+				case 'd':
+					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
+						int srctmpvar = allocTempVar();
+						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
+						assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i - 1)->item.number) + " - 1");
+						exprlist->get(i - 1)->item.number = -srctmpvar;
+					}
+					else {
+						// SyntaxErrorException
+					}
+					break;
+				case 'i':
+					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
+						int srctmpvar = allocTempVar();
+						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
+						assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i - 1)->item.number) + " + 1");
+						exprlist->get(i - 1)->item.number = -srctmpvar;
+					}
+					else {
+						// SyntaxErrorException
+					}
+					break;
+				default:
+					
+					break;
+				}
+				exprlist->remove(exprlist->get(i));
+			}
 			if (exprlist->get(i)->prev->item.type == TYPE_OPER and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type == TYPE_OPERAND or exprlist->get(i)->next->item.type == TYPE_OPERAND_VAR)) {
 				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
 				ed--;
@@ -474,6 +509,9 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				exprlist->remove(exprlist->get(i));
 			}
 		}
+		printf("ax:");
+		printstack(*exprlist);
+		exprlist->remove(exprlist->get(ed));
 		// priority from high to lowest
 		/*
 		* for(int i=st;i<=ed;i++){
@@ -635,6 +673,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					else {
 						// SyntaxErrorException
 					}
+					printstack(*exprlist);
 					break;
 				case 'e':
 					//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
@@ -885,6 +924,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 					defineStatement(ln, exprlist->get(i)->item.number);
 			}
 			exprlist->popfirst();
+			printstack(*exprlist);
 			debracket_process(exprlist, ln);
 			rebracket_process(exprlist, ln);
 			break;
@@ -980,6 +1020,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			for (int i = 1;exprlist->get(i)->next != NULL;exprlist->popfirst()) {
 				iterexpr.addlast(exprlist->get(i)->item);
 			}
+			printstack(iterexpr);
 			// qLinkedList<item> cpcondexpr(condexpr);
 			// these statements divided suc.
 			fieldStatement(ln, S_FIELD_BEGIN);
@@ -999,12 +1040,15 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				debracket_process(&condexpr, ln);
 				rebracket_process(&condexpr, ln);
 				printstack(condexpr);
+				
+				fieldStatement(ln,S_FIELD_BEGIN);
 				if(condexpr.first->item.type==TYPE_OPERAND){
 					ifStatement(ln, itos(condexpr.first->item.number));
 				}else{
 					ifStatement(ln, formatVarName(condexpr.first->item.number));
 				}
 				fieldStack.addfirst(FIELD_LOOP_FALSE);
+				fieldStack.addfirst(FIELD_NORMAL_TRUE);
 			}
 			else {
 				if(initexpr.popable()){
@@ -1013,19 +1057,22 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				assignStatement(ln, -998, "0");
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
-				ifStatement(ln,formatVarName( -998));
+				ifStatement(ln,formatVarName(-998));
 				debracket_process(&iterexpr, ln);
 				rebracket_process(&iterexpr, ln);
 				fieldStatement(ln, S_FIELD_END);
 				assignStatement(ln, -998, "1");
 				debracket_process(&condexpr, ln);
 				rebracket_process(&condexpr, ln);
+				
+				fieldStatement(ln,S_FIELD_BEGIN);
 				if(condexpr.first->item.type==TYPE_OPERAND){
 					ifStatement(ln, itos(condexpr.first->item.number));
 				}else{
 					ifStatement(ln, formatVarName(condexpr.first->item.number));
 				}
 				fieldStack.addfirst(FIELD_LOOP_TRUE);
+				fieldStack.addfirst(FIELD_NORMAL_TRUE);
 			}
 		}
 		break;
@@ -1451,20 +1498,20 @@ void genExpr() {
 				exprlist = new qLinkedList<item>();
 				flag_exprclosed=false;
 			}
-			if (i + 1 >= expr.size() and input_iterator + 1<input_buf.size()) {
-				do{
-					printf("NEXT LN\n");
-					printf(input_buf[input_iterator+1].text.c_str());
-					printf("\n");
-					input_iterator++;
-					expr = input_buf[input_iterator].text;
-					ln = input_buf[input_iterator].lineNum;
-					i = -1;
-				}while(expr=="");
-			}
+			
 		}
 		// force close all unclosed statemnts and fields
-		
+		if (i + 1 >= expr.size() and input_iterator + 1<input_buf.size()) {
+			do{
+				printf("NEXT LN\n");
+				printf(input_buf[input_iterator+1].text.c_str());
+				printf("\n");
+				input_iterator++;
+				expr = input_buf[input_iterator].text;
+				ln = input_buf[input_iterator].lineNum;
+				i = -1;
+			}while(expr=="");
+		}
 	}
 	/*// close numberbuffer
 	if(numberbuffer!=""){
