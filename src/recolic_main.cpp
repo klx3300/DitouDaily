@@ -14,10 +14,10 @@
 #include "analyser.hpp"
 #include "processor.hpp"
 
-#define FRM_ERROR(error_code) { cout << "\nException occurred at recolic_main():Error code is " << error_code << endl; system("pause"); return error_code; }
-#define FRM_ERROR_(error_code) { cout << "\nException occurred at recolic_main():Error code is " << error_code << endl; system("pause"); exit(error_code); }
-#define ANA_ERROR(error_code) { cout << "\nException occurred at analyse_main():Error code is " << error_code << endl; system("pause"); return error_code; }
-#define CPU_ERROR(error_code) { cout << "\nException occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
+#define FRM_ERROR(error_code) { cout << "\nSoftware exception occurred at recolic_main():Error code is " << error_code << endl; system("pause"); return error_code; }
+#define FRM_ERROR_(error_code) { cout << "\nSoftware exception occurred at recolic_main.cpp:Error code is " << error_code << endl; system("pause"); exit(error_code); }
+#define ANA_ERROR(error_code) { cout << "\Software exception occurred at analyse_main():Error code is " << error_code << endl; system("pause"); return error_code; }
+#define CPU_ERROR(error_code) { cout << "\Software exception occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define RECOLIC_DEBUG
 
 #ifdef _WIN32
@@ -144,7 +144,7 @@ int main()
 
 void recolic_frame::cut_comment(string *ps)
 {
-	//ÏÈÉ±¿çĞĞ×¢ÊÍ
+	//å…ˆæ€è·¨è¡Œæ³¨é‡Š
 	size_t comment_e = string::npos;
 	if (recolic_frame::current_line_is_comment)
 	{
@@ -162,7 +162,7 @@ void recolic_frame::cut_comment(string *ps)
 		}
 	}
 re_cut:
-	//ÔÙÉ±ĞĞÄÚ×¢ÊÍ(¿¼ÂÇ¿çĞĞ)
+	//å†æ€è¡Œå†…æ³¨é‡Š(è€ƒè™‘è·¨è¡Œ)
 	size_t comment_b = ps->find("/*");
 	if (comment_b != string::npos)
 	{
@@ -180,7 +180,7 @@ re_cut:
 		}
 	}
 re_cut_:
-	//ÔÙÉ±Ë«ÒıºÅÄÚÈİ
+	//å†æ€åŒå¼•å·å†…å®¹
 	size_t quote_p = ps->find('"');
 	if (quote_p != string::npos)
 	{
@@ -206,10 +206,10 @@ re_cut_:
 		}
 	}
 gt_t_out:
-	//ÔÙÉ±Ë«¸Ü×¢ÊÍ
+	//å†æ€åŒæ æ³¨é‡Š
 	size_t qpq = ps->find("//");
 	*ps = ps->substr(0, qpq);
-	//É±¹â\t\rÍêÊÂ
+	//æ€å…‰\t\rå®Œäº‹
 	auto last_it = remove_if(ps->begin(), ps->end(), [](char ch) -> bool { return ch == '\t' || ch == '\r'; });
 	ps->erase(last_it, ps->end());
 	return;
@@ -217,7 +217,7 @@ gt_t_out:
 
 bool recolic_frame::is_var_name(const string &s)
 {
-	//ÅĞ¶ÏÊäÈëµÄ×Ö·û´®ÊÇ·ñÊÇÒ»¸öºÏ·¨µÄ±äÁ¿Ãû
+	//åˆ¤æ–­è¾“å…¥çš„å­—ç¬¦ä¸²æ˜¯å¦æ˜¯ä¸€ä¸ªåˆæ³•çš„å˜é‡å
 	if (s.empty())
 		return false;
 	if (s == "int" || s == "if" || s == "else" || s == "for" || s == "break" || s == "while" || s == "do" || s == "printf" || s == "return")
@@ -243,8 +243,8 @@ bool recolic_frame::is_var_name(const string &s)
 #define M(ch) ||markch==ch
 size_t recolic_frame::format_var_name(string *ps)
 {
-	//ÒÔÔËËã·ûºÍ¿Õ¸ñÎª½ç¡£
-	//ÏÈ¹¹½¨Hash±í
+	//ä»¥è¿ç®—ç¬¦å’Œç©ºæ ¼ä¸ºç•Œã€‚
+	//å…ˆæ„å»ºHashè¡¨
 	vector<string> usedHash;
 	auto rets = DivideString(*ps);
 	static int max_var_num = 0;
@@ -264,7 +264,7 @@ size_t recolic_frame::format_var_name(string *ps)
 			usedHash.push_back(ts);
 		}
 	}
-	//ÔÙ¸ù¾İHash±íÌæ»»
+	//å†æ ¹æ®Hashè¡¨æ›¿æ¢
 	for (size_t cter = 0;cter < usedHash.size();++cter)
 	{
 		size_t cp = ps->find(usedHash[cter]);
@@ -358,7 +358,7 @@ search_again:
 		}
 		*pmust_erase = true;
 		return true;
-	});//Ñ°ÕÒ·Ç·¨doÓï¾ä
+	});//å¯»æ‰¾éæ³•doè¯­å¥
 	if (!must_erase)
 		return;
 	pst->text.erase(pst->text.end() - 2, pst->text.end());
