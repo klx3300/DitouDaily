@@ -294,6 +294,7 @@ int Calc(deque<statement>::iterator &now_it)
 			}
 			else
             {
+                //printf("go into else\n");
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
                 while(fieldCnt!=Loc_fieldCnt&&now_it!=buf.end())
@@ -306,6 +307,7 @@ int Calc(deque<statement>::iterator &now_it)
                 }
                 if(now_it==buf.end())
                 {
+                    //printf("go away\n");
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
@@ -313,6 +315,8 @@ int Calc(deque<statement>::iterator &now_it)
                 ++now_it;
                 if((*now_it).cmdType!=S_FIELD_BEGIN)
                 {
+                    //printf("go away2\n");
+                    //printf("%d %d %d",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
