@@ -20,8 +20,8 @@
 #define CPU_ERROR(error_code) { cout << "\nException occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define RECOLIC_DEBUG
 
-#ifdef RECOLIC_DEBUG
-//#include <Windows.h>
+#ifdef _WIN32
+#include <Windows.h>
 #endif
 using namespace std;
 
@@ -29,7 +29,7 @@ deque<statement> input_buf;
 deque<statement> buf;
 vector<int> print_buffer;
 int *pMemory = nullptr;
-//void __cdecl global_new_handler();
+void __cdecl global_new_handler();
 
 namespace recolic_frame
 {
@@ -67,94 +67,79 @@ namespace recolic_frame
 			return "S_BREAK";
 		case S_ERROR:
 			return "S_ERROR";
+		default:
+			return "ERROR_NOTFOUNT";
 		}
 	}
-	int _crt_analyse_startup_main()
-	{/*
-		auto last = remove_if(input_buf.begin(), input_buf.end(), [](const statement &s) -> bool {return s.text.empty();});
-		input_buf.erase(last, input_buf.end());
-	search_again:
-		auto pst = find_if(input_buf.begin(), input_buf.end(), [](statement &s) -> bool {
-			size_t pt = s.text.find("do", 0);
-			if (pt == string::npos)
-				return false;
-			auto last_ = remove_if(s.text.begin(), s.text.end(), [](char ch) -> bool {return ch == ' ';});
-			s.text.erase(last_, s.text.end());
-			if (s.text[pt + 2] != '{')
-				return true;
-		});//Ñ°ÕÒ·Ç·¨doÓï¾ä
-		pst->text.erase(pst->text.end() - 2, pst->text.end());
-		(pst + 1)->text = "do" + (pst + 1)->text;
-		goto search_again;*/
-		return analyse_main();
-	}
+	void fuck_do_while();
 }
 
 int main()
 {
-	//set_new_handler(global_new_handler);
-	ifstream ifs("D:\\visual studio 2015\\SeedCup2016\\Debug\\input.txt");
-	if (!ifs)
-		FRM_ERROR(3);
-	char frm_tmp_buf[256] = { 0 };
-	string frm_tmp_buf_;
-	ifs.getline(frm_tmp_buf, 256);
-	int frm_lineNum = 1;
-	while (!ifs.eof())
-	{
+		set_new_handler(global_new_handler);
+		ifstream ifs("D:\\visual studio 2015\\SeedCup2016\\Debug\\input.txt");
+		if (!ifs)
+			FRM_ERROR(3);
+		char frm_tmp_buf[256] = { 0 };
+		string frm_tmp_buf_;
+		ifs.getline(frm_tmp_buf, 256);
+		int frm_lineNum = 1;
+		while (!ifs.eof())
+		{
+			frm_tmp_buf_ = frm_tmp_buf;
+			recolic_frame::cut_comment(&frm_tmp_buf_);
+			recolic_frame::format_var_name(&frm_tmp_buf_);
+			input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
+			++frm_lineNum;
+			ifs.getline(frm_tmp_buf, 256);
+		}
 		frm_tmp_buf_ = frm_tmp_buf;
 		recolic_frame::cut_comment(&frm_tmp_buf_);
 		recolic_frame::format_var_name(&frm_tmp_buf_);
 		input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
-		++frm_lineNum;
-		ifs.getline(frm_tmp_buf, 256);
-	}
-	frm_tmp_buf_ = frm_tmp_buf;
-	recolic_frame::cut_comment(&frm_tmp_buf_);
-	recolic_frame::format_var_name(&frm_tmp_buf_);
-	input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
-	ifs.close();
+		ifs.close();
+		recolic_frame::fuck_do_while();
 #ifdef RECOLIC_DEBUG
-	for (size_t cter = 0;cter < input_buf.size();++cter)
-	{
-		cout << input_buf[cter].lineNum << "> " << input_buf[cter].text << endl;
-	}
-	cout << "********************************\nNow try to launch Compiler...\n" << endl;
-#endif
-	int analyse_error_code = recolic_frame::_crt_analyse_startup_main();
-#ifdef RECOLIC_DEBUG
-	for (size_t cter = 0;cter < buf.size();++cter)
-	{
-		cout << buf[cter].lineNum << "|" << recolic_frame::formatH(buf[cter].cmdType) << "> " << buf[cter].text << endl;
-	}
-	cout << "Now try to launch CPU...\n" << endl;
-#endif
-	if (analyse_error_code)
-		ANA_ERROR(analyse_error_code);
-	int processor_error_code = processor_main();
-	if (processor_error_code)
-		CPU_ERROR(processor_error_code);
-	{ //Final deal
-		int last_success = -1;
-		stringstream ss;
-		for (size_t cter = 0;cter < print_buffer.size();++cter)
+		for (size_t cter = 0;cter < input_buf.size();++cter)
 		{
-			if (print_buffer[cter] != last_success)
-			{
-				last_success = print_buffer[cter];
-				ss << last_success << ' ';
-			}
+			cout << input_buf[cter].lineNum << "> " << input_buf[cter].text << endl;
 		}
-		string too = ss.str();
-		too = too.substr(0, too.size() - 1);
-#ifdef RECOLIC_DEBUG
-		cout << "\nResult is here:" << too << endl;
+		cout << "********************************\nNow try to launch Compiler...\n" << endl;
 #endif
-		ofstream os("D:\\visual studio 2015\\SeedCup2016\\Debug\\output.txt", ios::out);
-		os << too;
-		os.close();
-	}
-	return 0;
+		int analyse_error_code = analyse_main();
+#ifdef RECOLIC_DEBUG
+		for (size_t cter = 0;cter < buf.size();++cter)
+		{
+			cout << buf[cter].lineNum << "|" << recolic_frame::formatH(buf[cter].cmdType) << "> " << buf[cter].text << endl;
+		}
+		cout << "Now try to launch CPU...\n" << endl;
+#endif
+		if (analyse_error_code)
+			ANA_ERROR(analyse_error_code);
+		int processor_error_code = processor_main();
+		if (processor_error_code)
+			CPU_ERROR(processor_error_code);
+		{ //Final deal
+			int last_success = -1;
+			stringstream ss;
+			for (size_t cter = 0;cter < print_buffer.size();++cter)
+			{
+				if (print_buffer[cter] != last_success)
+				{
+					last_success = print_buffer[cter];
+					ss << last_success << ' ';
+				}
+			}
+			string too = ss.str();
+			too = too.substr(0, too.size() - 1);
+#ifdef RECOLIC_DEBUG
+			cout << "\nResult is here:" << too << endl;
+#endif
+			ofstream os("D:\\visual studio 2015\\SeedCup2016\\Debug\\output.txt", ios::out);
+			os << too;
+			os.close();
+		}
+		return 0;
 }
 
 void recolic_frame::cut_comment(string *ps)
@@ -289,7 +274,7 @@ size_t recolic_frame::format_var_name(string *ps)
 		{
 			cOK = false;
 			char markch = (*ps)[cpl];
-			if (!(markch == ' ' M(0) M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':')))
+			if (!(markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':')))
 			{
 				cp = ps->find(usedHash[cter], cp + 1);
 				cpl = cp + usedHash[cter].size();
@@ -303,13 +288,13 @@ size_t recolic_frame::format_var_name(string *ps)
 	}
 	return max_var_num;
 }
-/*
+
 void __cdecl global_new_handler()
 {
-	cout << "\nERROR:bad_alloc occurred! You need more memory!" << endl;
-	system("pause");
-	exit(1);
-}*/
+cout << "\nERROR:bad_alloc occurred! You need more memory!" << endl;
+system("pause");
+exit(1);
+}
 
 #define I(ch) ||ich==ch
 std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
@@ -332,12 +317,11 @@ std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
 	size_t lastPos = 0;
 	size_t thisPos = o_find(tod);
 	std::vector<std::string> sbuf;
-	if (thisPos != std::string::npos)
-	{
-		if (thisPos)
-			sbuf.push_back(tod.substr(0, thisPos));
-		goto gt_1;
-	}
+	if (thisPos == string::npos)
+		return vector<string>{tod};
+	if (thisPos)
+		sbuf.push_back(tod.substr(0, thisPos));
+	goto gt_1;
 	do {
 		if (thisPos - lastPos - 1)
 			sbuf.push_back(tod.substr(lastPos + 1, thisPos - lastPos - 1));
@@ -348,4 +332,36 @@ std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
 	if (lastPos + 1 != tod.size())
 		sbuf.push_back(tod.substr(lastPos + 1));
 	return sbuf;
+}
+
+void recolic_frame::fuck_do_while()
+{
+	auto last = remove_if(input_buf.begin(), input_buf.end(), [](const statement &s) -> bool {return s.text.empty();});//remove empty lines.
+	input_buf.erase(last, input_buf.end());
+	bool must_erase = false;
+	bool *pmust_erase = &must_erase;
+search_again:
+	must_erase = false;
+	auto pst = find_if(input_buf.begin(), input_buf.end(), [pmust_erase](statement &s) -> bool {
+		size_t pt = s.text.find("do", 0);
+		if (pt == string::npos)
+			return false;
+		if (s.text.find(' ') != string::npos)
+		{
+			auto last_ = remove_if(s.text.begin(), s.text.end(), [](char ch) -> bool {return ch == ' ';});//remove empty characters.
+			s.text.erase(last_, s.text.end());
+		}
+		if (s.text.size() > pt + 2)
+		{
+			if (s.text[pt + 2] == '{')
+				return false;
+		}
+		*pmust_erase = true;
+		return true;
+	});//Ñ°ÕÒ·Ç·¨doÓï¾ä
+	if (!must_erase)
+		return;
+	pst->text.erase(pst->text.end() - 2, pst->text.end());
+	(pst + 1)->text = "do" + (pst + 1)->text;
+	goto search_again;
 }
