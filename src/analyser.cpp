@@ -216,8 +216,8 @@ bool tmpvars[65536];
 
 qLinkedList<bool *> vstack;
 void vstack_new_field(){
-	bool *variables=new bool[256];
-	for(int i=0;i<256;i++){
+	bool *variables=new bool[65536];
+	for(int i=0;i<65536;i++){
 		variables[i]=false;
 	}
 	vstack.addfirst(variables);

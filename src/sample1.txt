@@ -1,0 +1,14 @@
+
+int a=0,b=0,c=0,d=0;
+int i=a+b,j=c+d;
+int k=i*j;
+
+{
+int a=1,int b=2;
+int c=a+b;
+}
+
+int l=a+b+c+d+i+j+k;
+
+if(l!=0)
+	printf();
