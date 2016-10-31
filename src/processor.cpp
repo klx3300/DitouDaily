@@ -296,13 +296,19 @@ int Calc(deque<statement>::iterator &now_it)
             {
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
-                while(fieldCnt!=Loc_fieldCnt)
+                while(fieldCnt!=Loc_fieldCnt&&now_it!=buf.end())
                 {
                     ++now_it;
 					if((*now_it).cmdType==S_FIELD_BEGIN)
 						++fieldCnt;
 					if((*now_it).cmdType==S_FIELD_END)
 						--fieldCnt;
+                }
+                if(now_it==buf.end())
+                {
+                    fieldCnt=Loc_fieldCnt+1;
+                    now_it=Loc_now_it;
+                    break;
                 }
                 ++now_it;
                 if((*now_it).cmdType!=S_FIELD_BEGIN)
