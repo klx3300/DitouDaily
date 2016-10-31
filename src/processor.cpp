@@ -101,11 +101,11 @@ int Calc(deque<statement>::iterator &now_it)
 				if((*now_it_tmp).cmdType==S_GOTO_DEST&&Loc_fieldCnt==fieldCnt)
 				{
 					now_it=now_it_tmp;
-                    puts("");
+                    //puts("");
 					break;
 				}
 			}
-			puts("");
+			//puts("");
 			fieldCnt=Loc_fieldCnt;
 			break;
 		}
@@ -380,7 +380,7 @@ int Calc(deque<statement>::iterator &now_it)
 
 int processor_main()//If no error occurred, return 0.
 {
-    int cnt=0;
+    //int cnt=0;
 	for(deque<statement>::iterator now_it=buf.begin();now_it!=buf.end();++now_it)
     {
         //if(++cnt>100)

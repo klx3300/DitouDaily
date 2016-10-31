@@ -1141,8 +1141,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				}else{
 					ifStatement(ln, formatVarName(condexpr.first->item.number));
 				}
-				fieldStack.addfirst(FIELD_LOOP_TRUE);
 				fieldStack.addfirst(FIELD_NORMAL_TRUE);
+				fieldStack.addfirst(FIELD_LOOP_TRUE);
 			}
 		}
 		break;
