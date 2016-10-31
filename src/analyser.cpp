@@ -943,9 +943,15 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			for (int i = 1;exprlist->get(i)->item.oper != ';';exprlist->popfirst()) {
 				condexpr.addlast(exprlist->get(i)->item);
 			}
+			if(!condexpr.popable()){
+				item it;
+				it.type = TYPE_OPERAND;
+				it.number=1;
+				condexpr.addlast(it);
+			}
 			printstack(condexpr);
 			exprlist->popfirst();
-			for (int i = 1;exprlist->get(i)->item.oper != ')';exprlist->popfirst()) {
+			for (int i = 1;exprlist->get(i)->next != NULL;exprlist->popfirst()) {
 				iterexpr.addlast(exprlist->get(i)->item);
 			}
 			// qLinkedList<item> cpcondexpr(condexpr);
