@@ -1463,6 +1463,8 @@ void genExpr() {
 				}while(expr=="");
 			}
 		}
+		// force close all unclosed statemnts and fields
+		
 	}
 	/*// close numberbuffer
 	if(numberbuffer!=""){
@@ -1479,6 +1481,13 @@ void genExpr() {
 	numberbuffer="";
 	}
 	rcalc(&exprlist);*/
+	{
+		item it;
+		it.type = TYPE_OPERAND;
+		it.number=1;
+		exprlist->addlast(it);
+		rcalc(exprlist, ln);
+	}
 }
 
 int analyse_main() {
