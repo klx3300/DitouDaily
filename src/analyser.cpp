@@ -272,8 +272,8 @@ void gotodestStatement(int ln) {
 	buf.push_back(s);
 }
 
-void ifStatement(int ln, int varname) {
-	statement s(ln, formatVarName(varname), S_IF);
+void ifStatement(int ln, string expr) {
+	statement s(ln, expr, S_IF);
 	buf.push_back(s);
 }
 
@@ -889,13 +889,21 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				exprlist->poplast();
 				debracket_process(exprlist, ln);
 				rebracket_process(exprlist, ln);
-				ifStatement(ln, exprlist->first->item.number);
+				if(exprlist->first->item.type==TYPE_OPERAND){
+					ifStatement(ln, itos(exprlist->first->item.number));
+				}else{
+					ifStatement(ln, formatVarName(exprlist->first->item.number));
+				}
 				fieldStack.addfirst(FIELD_NORMAL_FALSE);
 			}
 			else {
 				debracket_process(exprlist, ln);
 				rebracket_process(exprlist, ln);
-				ifStatement(ln, exprlist->first->item.number);
+				if(exprlist->first->item.type==TYPE_OPERAND){
+					ifStatement(ln, itos(exprlist->first->item.number));
+				}else{
+					ifStatement(ln, formatVarName(exprlist->first->item.number));
+				}
 				fieldStack.addfirst(FIELD_NORMAL_TRUE);
 			}
 			break;
@@ -908,14 +916,22 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 					gotodestStatement(ln);
 					debracket_process(exprlist, ln);
 					rebracket_process(exprlist, ln);
-					ifStatement(ln, exprlist->first->item.number);
+					if(exprlist->first->item.type==TYPE_OPERAND){
+						ifStatement(ln, itos(exprlist->first->item.number));
+					}else{
+						ifStatement(ln, formatVarName(exprlist->first->item.number));
+					}
 					fieldStack.addfirst(FIELD_LOOP_FALSE);
 				}
 				else {
 					gotodestStatement(ln);
 					debracket_process(exprlist, ln);
 					rebracket_process(exprlist, ln);
-					ifStatement(ln, exprlist->first->item.number);
+					if(exprlist->first->item.type==TYPE_OPERAND){
+						ifStatement(ln, itos(exprlist->first->item.number));
+					}else{
+						ifStatement(ln, formatVarName(exprlist->first->item.number));
+					}
 					fieldStack.addfirst(FIELD_LOOP_TRUE);
 				}
 			}
@@ -925,7 +941,11 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				exprlist->popfirst();
 				debracket_process(exprlist, ln);
 				rebracket_process(exprlist, ln);
-				ifStatement(ln, exprlist->first->item.number);
+				if(exprlist->first->item.type==TYPE_OPERAND){
+					ifStatement(ln, itos(exprlist->first->item.number));
+				}else{
+					ifStatement(ln, formatVarName(exprlist->first->item.number));
+				}
 				gotoStatement(ln);
 				fieldStatement(ln, S_FIELD_END);
 			}
@@ -964,7 +984,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				assignStatement(ln, -998, "0");
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
-				ifStatement(ln, -998);
+				ifStatement(ln, formatVarName(-998));
 				debracket_process(&iterexpr, ln);
 				rebracket_process(&iterexpr, ln);
 				fieldStatement(ln, S_FIELD_END);
@@ -972,7 +992,11 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				debracket_process(&condexpr, ln);
 				rebracket_process(&condexpr, ln);
 				printstack(condexpr);
-				ifStatement(ln, condexpr.first->item.number);
+				if(condexpr.first->item.type==TYPE_OPERAND){
+					ifStatement(ln, itos(condexpr.first->item.number));
+				}else{
+					ifStatement(ln, formatVarName(condexpr.first->item.number));
+				}
 				fieldStack.addfirst(FIELD_LOOP_FALSE);
 			}
 			else {
@@ -981,14 +1005,18 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				assignStatement(ln, -998, "0");
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
-				ifStatement(ln, -998);
+				ifStatement(ln,formatVarName( -998));
 				debracket_process(&iterexpr, ln);
 				rebracket_process(&iterexpr, ln);
 				fieldStatement(ln, S_FIELD_END);
 				assignStatement(ln, -998, "1");
 				debracket_process(&condexpr, ln);
 				rebracket_process(&condexpr, ln);
-				ifStatement(ln, condexpr.first->item.number);
+				if(condexpr.first->item.type==TYPE_OPERAND){
+					ifStatement(ln, itos(condexpr.first->item.number));
+				}else{
+					ifStatement(ln, formatVarName(condexpr.first->item.number));
+				}
 				fieldStack.addfirst(FIELD_LOOP_TRUE);
 			}
 		}
