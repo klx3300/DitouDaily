@@ -8,15 +8,19 @@ int fieldCnt=0;//count how many field it has
 
 void New_Value(int Number)
 {
+    map<int,pair<int,int> >::iterator now=allValue.find(Number);
+    if(now!=allValue.end()&&(*now).second.first!=fieldCnt)
+        return;
 	allValue.insert(make_pair(Number,make_pair(-fieldCnt,0)));
 }
 
 int Give_Value(int Number,int Value)
 {
 	map<int,pair<int,int> >::iterator now=allValue.find(Number);
-	if(now==allValue.end())
+	if(now==allValue.end()||(*now).second.first!=fieldCnt)
         allValue.insert(make_pair(Number,make_pair(-fieldCnt,Value)));
-    (*now).second.second=Value;
+    else
+        (*now).second.second=Value;
 	return 0;
 }
 
@@ -60,18 +64,23 @@ int Calc(deque<statement>::iterator &now_it)
 		case S_FIELD_BEGIN:
 		{
 			++fieldCnt;
+            //printf("fieldbegin\n");
 			break;
 		}
 		case S_FIELD_END:
 		{
 			--fieldCnt;
 			map<int,pair<int,int> >::iterator tmp;
+            //printf("fieldend\n");
 			for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
 			{
+                //printf("erasefor\n");
+                //printf("%d %d %d\n",(*now).first,(*now).second.first,(*now).second.second);
 				if((*now).second.first<-fieldCnt)
 				{
 					tmp=now;
 					++now;
+                    //printf("erase\n");
 					allValue.erase(tmp);
 				}
 				else	
@@ -292,8 +301,9 @@ int Calc(deque<statement>::iterator &now_it)
 				}
 				break;
 			}
-			/*else
+			else
             {
+                //printf("go into else\n");
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
                 while(fieldCnt!=Loc_fieldCnt&&now_it!=buf.end())
@@ -306,6 +316,7 @@ int Calc(deque<statement>::iterator &now_it)
                 }
                 if(now_it==buf.end())
                 {
+                    //printf("go away\n");
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
@@ -313,6 +324,8 @@ int Calc(deque<statement>::iterator &now_it)
                 ++now_it;
                 if((*now_it).cmdType!=S_FIELD_BEGIN)
                 {
+                    //printf("go away2\n");
+                    //printf("%d %d %d",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
@@ -339,7 +352,7 @@ int Calc(deque<statement>::iterator &now_it)
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
                 break;
-            }*/
+            }
 		}
 		case S_ELSE:
 		{
