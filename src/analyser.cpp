@@ -214,7 +214,18 @@ item::item() {
 int currIndex = 0; // now analysis pointer position
 bool tmpvars[65536];
 
-//qLinkedList<bool *variables> vstack
+qLinkedList<bool *> vstack;
+void vstack_new_field(){
+	bool *variables=new bool[256];
+	for(int i=0;i<256;i++){
+		variables[i]=false;
+	}
+	vstack.addfirst(variables);
+};
+void vstack_pop_field(){
+	delete[] vstack.first->item;
+	vstack.popfirst();
+};
 
 void clearTempVarFlags() {
 	for (int i = 0;i<256;i++) {
@@ -247,11 +258,24 @@ void resetGotoTag() {
 }
 
 void defineStatement(int ln, int varname) {
-	string tmpstr("");
-	tmpstr += "int _____##@@";
-	tmpstr += itos(varname);
-	statement s(ln, tmpstr, S_ASSIGN);
-	buf.push_back(s);
+	if(varname<0){
+		string tmpstr("");
+		tmpstr += "int _____##@@";
+		tmpstr += itos(varname);
+		statement s(ln, tmpstr, S_ASSIGN);
+		buf.push_back(s);
+	}else{
+		if(vstack.first->item[varname]==false){
+			string tmpstr("");
+			tmpstr += "int _____##@@";
+			tmpstr += itos(varname);
+			statement s(ln, tmpstr, S_ASSIGN);
+			buf.push_back(s);
+			vstack.first->item[varname]=true;
+		}else{
+			// defined do nothing.
+		}
+	}
 }
 
 void assignStatement(int ln, int varname, string simplest) {
@@ -261,6 +285,11 @@ void assignStatement(int ln, int varname, string simplest) {
 }
 
 void fieldStatement(int ln, STATEMENT_T type) {
+	if(type==S_FIELD_BEGIN){
+		vstack_new_field();
+	}else{
+		vstack_pop_field();
+	}
 	statement s(ln, "", type);
 	buf.push_back(s);
 }
@@ -432,7 +461,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				printf("PROC OPER:%c\n",exprlist->get(i)->item.oper);
 			else
 				printf("PROC NUMB:%d\n",exprlist->get(i)->item.number);
-			if (exprlist->get(i)->prev->item.type == TYPE_OPERAND_VAR and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type != TYPE_OPERAND or exprlist->get(i)->next->item.type != TYPE_OPERAND_VAR)) {
+			if (exprlist->get(i)->prev->item.type == TYPE_OPERAND_VAR and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type != TYPE_OPERAND and exprlist->get(i)->next->item.type != TYPE_OPERAND_VAR)) {
 				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
 				ed--;
 				switch (exprlist->get(i)->item.oper) {
@@ -446,6 +475,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					else {
 						// SyntaxErrorException
 					}
+					exprlist->remove(exprlist->get(i));
 					break;
 				case 'i':
 					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
@@ -457,12 +487,13 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					else {
 						// SyntaxErrorException
 					}
+					exprlist->remove(exprlist->get(i));
 					break;
 				default:
 					
 					break;
 				}
-				exprlist->remove(exprlist->get(i));
+				//exprlist->remove(exprlist->get(i));
 			}
 			if (exprlist->get(i)->prev->item.type == TYPE_OPER and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type == TYPE_OPERAND or exprlist->get(i)->next->item.type == TYPE_OPERAND_VAR)) {
 				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
@@ -478,40 +509,18 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					else {
 						exprlist->get(i + 1)->item.number = -(exprlist->get(i + 1)->item.number);
 					}
-					
-					break;
-				case 'd':
-					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
-						int srctmpvar = allocTempVar();
-						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
-						assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i - 1)->item.number) + " - 1");
-						exprlist->get(i - 1)->item.number = -srctmpvar;
-					}
-					else {
-						// SyntaxErrorException
-					}
-					break;
-				case 'i':
-					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
-						int srctmpvar = allocTempVar();
-						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
-						assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i - 1)->item.number) + " + 1");
-						exprlist->get(i - 1)->item.number = -srctmpvar;
-					}
-					else {
-						// SyntaxErrorException
-					}
+					exprlist->remove(exprlist->get(i));
 					break;
 				default:
 					
 					break;
 				}
-				exprlist->remove(exprlist->get(i));
+				
 			}
+			printf("ax:");
+			printstack(*exprlist);
 		}
-		printf("ax:");
-		printstack(*exprlist);
-		exprlist->remove(exprlist->get(ed));
+		exprlist->remove(exprlist->get(ed+1));
 		// priority from high to lowest
 		/*
 		* for(int i=st;i<=ed;i++){
@@ -655,6 +664,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				i--;
 			}
 		}
+		printstack(*exprlist);
 		for (int i = st;i <= ed;i++) {//low
 			if (exprlist->get(i)->item.type == TYPE_OPER and low_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
 				ed -= 2;
@@ -1247,7 +1257,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				}
 		}
 	}
-
+	clearTempVarFlags();
 }
 
 int qatoi(string str) {
@@ -1269,6 +1279,7 @@ const int BRACKET_FLAG_NOLOOP = -1, BRACKET_FLAG_LOOP = 0, BRACKET_FLAG = 1;
 // when meet "else" , close statement immediately.
 
 void genExpr() {
+	vstack_new_field();
 	// convert deque input_buf into a single string.
 	string expr("");
 	int ln = input_buf[0].lineNum;
@@ -1535,6 +1546,7 @@ void genExpr() {
 		exprlist->addlast(it);
 		rcalc(exprlist, ln);
 	}
+	vstack_pop_field();
 }
 
 int analyse_main() {
