@@ -116,7 +116,7 @@ int main()
 #endif
 		//if (analyse_error_code)
 		//	ANA_ERROR(analyse_error_code);
-		int processor_error_code = processor_main();
+		/*int processor_error_code = processor_main();
 		//if (processor_error_code)
 		//	CPU_ERROR(processor_error_code);
 		{ //Final deal
@@ -138,7 +138,7 @@ int main()
 			ofstream os("output.txt", ios::out);
 			os << too;
 			os.close();
-		}
+		}*/
 		return 0;
 }
 

@@ -988,7 +988,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			printstack(*exprlist);
 			debracket_process(exprlist, ln);
 			rebracket_process(exprlist, ln);
-			check_stack_closure_normal(ln);
+			//if(FLAG_CHECKCLOSE)
+				check_stack_closure_normal(ln);
 			break;
 		case 'J':
 			exprlist->popfirst();
@@ -1114,7 +1115,14 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			}
 			else {
 				if(initexpr.popable()){
-					rcalc(&initexpr,ln);
+					for(int i=0;initexpr.get(i)!=NULL;i++){
+						if(initexpr.get(i)->item.type==TYPE_OPERAND_VAR)
+							defineStatement(ln, initexpr.get(i)->item.number);
+					}
+					initexpr.popfirst();
+					printstack(initexpr);
+					debracket_process(&initexpr, ln);
+					rebracket_process(&initexpr, ln);
 				}
 				assignStatement(ln, -998, "0");
 				gotodestStatement(ln);
@@ -1141,7 +1149,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		case 'P':
 			
 			printStatement(ln);
-			check_stack_closure_normal(ln);
+			//if(FLAG_CHECKCLOSE)
+				check_stack_closure_normal(ln);
 			break;
 		case 'E':
 			fieldStatement(ln, S_FIELD_BEGIN);
@@ -1151,7 +1160,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			break;
 		case 'B':
 			breakStatement(ln);
-			check_stack_closure_normal(ln);
+			//if(FLAG_CHECKCLOSE)
+				check_stack_closure_normal(ln);
 			break;
 		case 'o':
 			fieldStack.addfirst(FIELD_DLOOP);
@@ -1220,7 +1230,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			// but we still have to execute it due to the fucking requirements!
 			debracket_process(exprlist, ln);
 			rebracket_process(exprlist, ln);
-			check_stack_closure_normal(ln);
+			//if(FLAG_CHECKCLOSE)
+				check_stack_closure_normal(ln);
 			// check if last didn't use } to close field.
 			// true: didn't close normally(using '{' & '}')
 			// and commit close.
@@ -1235,7 +1246,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		// check if last didn't use } to close field.
 		// true: didn't close normally(using '{' & '}')
 		// and commit close.
-		check_stack_closure_normal(ln);
+		//if(FLAG_CHECKCLOSE)
+			check_stack_closure_normal(ln);
 	}
 	clearTempVarFlags();
 }
