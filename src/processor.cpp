@@ -292,7 +292,7 @@ int Calc(deque<statement>::iterator &now_it)
 				}
 				break;
 			}
-			else
+			/*else
             {
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
@@ -339,7 +339,7 @@ int Calc(deque<statement>::iterator &now_it)
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
                 break;
-            }
+            }*/
 		}
 		case S_ELSE:
 		{
