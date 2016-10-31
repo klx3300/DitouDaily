@@ -108,6 +108,7 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_ASSIGN:
 		{
+            //printf("%d %d %s\n",(*now_it).cmdType,(*now_it).lineNum,(*now_it).text.c_str());
 			string everyMember[4];
 			int tmpValue[4];
 			ss.clear();
@@ -366,8 +367,21 @@ int Calc(deque<statement>::iterator &now_it)
 
 int processor_main()//If no error occurred, return 0.
 {
+    int cnt=0;
 	for(deque<statement>::iterator now_it=buf.begin();now_it!=buf.end();++now_it)
+    {
+        //if(++cnt>50)
+        //    break;
+        //if((*now_it).cmdType==S_IF)
+        //{
+            //printf("%s\n",(*now_it).text.c_str());
+        //    for(map<int,pair<int,int> >::iterator it=allValue.begin();it!=allValue.end();++it)
+        //        printf("%d %d %d\n",(*it).first,(*it).second.first,(*it).second.second);
+        //    puts("");
+        //}
+       // printf("%d %d %s\n",(*now_it).cmdType,(*now_it).lineNum,(*now_it).text.c_str());
 		Calc(now_it);
-	return 0;
+    }
+    return 0;
 }
 
