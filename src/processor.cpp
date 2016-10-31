@@ -93,6 +93,7 @@ int Calc(deque<statement>::iterator &now_it)
 			int Loc_fieldCnt=fieldCnt;
 			for(deque<statement>::iterator now_it_tmp=now_it;now_it_tmp!=buf.begin();--now_it_tmp)
 			{
+                //printf("%d::::%d %d %s\n",fieldCnt,(*now_it_tmp).cmdType,(*now_it_tmp).lineNum,(*now_it_tmp).text.c_str());
 				if((*now_it_tmp).cmdType==S_FIELD_BEGIN)
 					--fieldCnt;
 				if((*now_it_tmp).cmdType==S_FIELD_END)
@@ -100,9 +101,11 @@ int Calc(deque<statement>::iterator &now_it)
 				if((*now_it_tmp).cmdType==S_GOTO_DEST&&Loc_fieldCnt==fieldCnt)
 				{
 					now_it=now_it_tmp;
+                    puts("");
 					break;
 				}
 			}
+			puts("");
 			fieldCnt=Loc_fieldCnt;
 			break;
 		}
@@ -302,27 +305,32 @@ int Calc(deque<statement>::iterator &now_it)
 				}
 				break;
 			}
-			/*else
+			else
             {
                 //printf("go into else\n");
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
                 while(fieldCnt!=Loc_fieldCnt&&now_it!=buf.end())
                 {
+                    //printf("gogogo\n");
+                    //printf("%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     ++now_it;
 					if((*now_it).cmdType==S_FIELD_BEGIN)
 						++fieldCnt;
 					if((*now_it).cmdType==S_FIELD_END)
 						--fieldCnt;
                 }
-                if(now_it==buf.end())
+                //printf("%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
+                if((*now_it).cmdType!=S_FIELD_END)
                 {
-                    //printf("go away\n");
+                    //printf("go away1\n");
+                    //printf("%d %d %d",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
                 }
                 ++now_it;
+                //printf("%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                 if((*now_it).cmdType!=S_FIELD_BEGIN)
                 {
                     //printf("go away2\n");
@@ -331,17 +339,22 @@ int Calc(deque<statement>::iterator &now_it)
                     now_it=Loc_now_it;
                     break;
                 }
+                //printf("\n %d \n",fieldCnt);
                 ++now_it;
                 ++fieldCnt;
                 if((*now_it).cmdType!=S_ELSE)
                 {
+                    //printf("go away3\n");
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
                 }
+                //printf("%d\n",fieldCnt);
                 while(fieldCnt!=Loc_fieldCnt)
                 {
+                    //printf("%d %d\n",fieldCnt,Loc_fieldCnt);
                     ++now_it;
+                    //printf("cout:%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     if((*now_it).cmdType!=S_FIELD_BEGIN&&(*now_it).cmdType!=S_FIELD_END)
                         (*now_it).cmdType=S_BLANK,(*now_it).lineNum=-1;
                     else
@@ -349,16 +362,16 @@ int Calc(deque<statement>::iterator &now_it)
                             ++fieldCnt;
                         else
                             --fieldCnt;
-                }
+                }//printf("k\n");
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
                 break;
-            }*/
+            }
 		}
 		case S_ELSE:
 		{
-			if(now_state.lineNum>0)
-				print_buffer.push_back(now_state.lineNum);
+			//if(now_state.lineNum>0)
+			//	print_buffer.push_back(now_state.lineNum);
 			break;
 		}
 	}
@@ -370,8 +383,8 @@ int processor_main()//If no error occurred, return 0.
     int cnt=0;
 	for(deque<statement>::iterator now_it=buf.begin();now_it!=buf.end();++now_it)
     {
-        //if(++cnt>50)
-        //    break;
+        //if(++cnt>100)
+        //   break;
         //if((*now_it).cmdType==S_IF)
         //{
             //printf("%s\n",(*now_it).text.c_str());
