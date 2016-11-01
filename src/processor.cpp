@@ -1,12 +1,12 @@
 #include "processor.hpp"
 #include "w_fix.hpp"
 
-int tempValue[65535];//temp values(which dont need define)
-map<int,pair<int,int> > allValue;//number fieldcnt value
-stringstream ss;//get every thing from the string
-int fieldCnt=0;//count how many field it has
+int tempValue[65535];//存储不需要声明的运算过程中的临时变量
+map<int,pair<int,int> > allValue;//存储需要声明的变量
+stringstream ss;
+int fieldCnt=0;//作用域计数器
 
-void New_Value(int Number)//define a new v with value 0
+void New_Value(int Number)//声明变量并赋值为0
 {
     map<int,pair<int,int> >::iterator now=allValue.find(Number);
     if(now!=allValue.end()&&(*now).second.first!=-fieldCnt)
@@ -14,7 +14,7 @@ void New_Value(int Number)//define a new v with value 0
 	allValue.insert(make_pair(Number,make_pair(-fieldCnt,0)));
 }
 
-int Give_Value(int Number,int Value)//give number v with Value
+int Give_Value(int Number,int Value)//变量赋值
 {
 	map<int,pair<int,int> >::iterator now=allValue.find(Number);
 	if(now==allValue.end())
@@ -24,13 +24,13 @@ int Give_Value(int Number,int Value)//give number v with Value
 	return 0;
 }
 
-int Get_Value(int Number)//get a v Value
+int Get_Value(int Number)//获取变量值
 {
 	map<int,pair<int,int> >::iterator now=allValue.find(Number);
 	return (*now).second.second;
 }
 
-int Get_Value_Double(int Number)//get a v'Value from map or tempValue
+int Get_Value_Double(int Number)//获取两种变量值
 {
 	if(Number<0)
 		return tempValue[-Number];
@@ -60,26 +60,26 @@ int Calc(deque<statement>::iterator &now_it)
 		{
 			break;
 		}
-		case S_FIELD_BEGIN://field of if else for while or do-while
+		case S_FIELD_BEGIN://if else for while 或者 do-while 的作用域开始
 		{
 			++fieldCnt;
-            break;
+            		break;
 		}
 		case S_FIELD_END:
 		{
 			--fieldCnt;
 			map<int,pair<int,int> >::iterator tmp;
-            for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
+			for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
 			{
-            	if((*now).second.first<-fieldCnt)
+            			if((*now).second.first<-fieldCnt)
 				{
 					tmp=now;
 					++now;
-            		allValue.erase(tmp);
+            				allValue.erase(tmp);
 				}
 				else	
 					++now;
-			}//delete all the v in this field
+			}//删除所有该作用域中的变量
 			break;
 		}
 		case S_GOTO:
@@ -94,8 +94,8 @@ int Calc(deque<statement>::iterator &now_it)
 				if((*now_it_tmp).cmdType==S_GOTO_DEST&&fieldCnt==Loc_fieldCnt-1)
 				{
 					now_it=now_it_tmp;
-                    fieldCnt=Loc_fieldCnt;
-                    break;
+                    			fieldCnt=Loc_fieldCnt;
+                    			break;
 				}
 			}
 			fieldCnt=Loc_fieldCnt;
@@ -103,10 +103,10 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_ASSIGN:
 		{
-            //using stringstream to get numbers
-            string everyMember[4];
+            		string everyMember[4];
 			int tmpValue[4];
 			ss.clear();
+			//使用stringstream获取变量
 			ss<<now_state.text;
 			ss>>everyMember[0];
 			if(everyMember[0]==RECOLIC_TEXT("int"))
@@ -119,7 +119,7 @@ int Calc(deque<statement>::iterator &now_it)
 			}
 			else
 			{
-                if(now_state.lineNum>0)
+                		if(now_state.lineNum>0)
 				print_buffer.push_back(now_state.lineNum);
 				ss>>everyMember[1];
 				ss>>everyMember[1];
@@ -216,7 +216,7 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_BREAK:
 		{
-            //find fieldend to break in the program
+            		//向后找到合适的FIELD_END实现break
 			if(now_state.lineNum>0)
 				print_buffer.push_back(now_state.lineNum);
 			while((*now_it).cmdType!=S_GOTO)
@@ -226,7 +226,8 @@ int Calc(deque<statement>::iterator &now_it)
 					++fieldCnt;
 				if((*now_it).cmdType==S_FIELD_END)
 				{
-					--fieldCnt;//check temp v
+					//删除作用域内变量
+					--fieldCnt;
 					map<int,pair<int,int> >::iterator tmp;
 					for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
 					{
@@ -245,8 +246,8 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_IF:
 		{
-            if(now_state.lineNum>0)
-                print_buffer.push_back(now_state.lineNum);
+            		if(now_state.lineNum>0)
+                		print_buffer.push_back(now_state.lineNum);
 			string everyMember;
 			bool flag;
 			int tmpValue;
@@ -270,7 +271,7 @@ int Calc(deque<statement>::iterator &now_it)
 				ss>>tmpValue;
 				flag=(tmpValue!=0);
 			}
-			if(!flag)//if false
+			if(!flag)//如果IF内变量为假
 			{
 				int Loc_fieldCnt=fieldCnt;
 				while(fieldCnt>Loc_fieldCnt-1)
@@ -297,54 +298,54 @@ int Calc(deque<statement>::iterator &now_it)
 				}
 				break;
 			}
-			else//if true
-            {
-                int Loc_fieldCnt=fieldCnt-1;
-                deque<statement>::iterator Loc_now_it=now_it;
-                while(fieldCnt!=Loc_fieldCnt&&now_it!=buf.end())
-                {
-                    ++now_it;
+			else//如果为真
+            		{
+				int Loc_fieldCnt=fieldCnt-1;
+				deque<statement>::iterator Loc_now_it=now_it;
+				while(fieldCnt!=Loc_fieldCnt&&now_it!=buf.end())
+				{
+					++now_it;
 					if((*now_it).cmdType==S_FIELD_BEGIN)
 						++fieldCnt;
 					if((*now_it).cmdType==S_FIELD_END)
 						--fieldCnt;
-                }
-                if((*now_it).cmdType!=S_FIELD_END)
-                {
-                    fieldCnt=Loc_fieldCnt+1;
-                    now_it=Loc_now_it;
-                    break;
-                }
-                ++now_it;
-                if((*now_it).cmdType!=S_FIELD_BEGIN)
-                {
-                    fieldCnt=Loc_fieldCnt+1;
-                    now_it=Loc_now_it;
-                    break;
-                }
-                ++now_it;
-                ++fieldCnt;
-                if((*now_it).cmdType!=S_ELSE)
-                {
-                    fieldCnt=Loc_fieldCnt+1;
-                    now_it=Loc_now_it;
-                    break;
-                }
-                while(fieldCnt!=Loc_fieldCnt)
-                {
-                    ++now_it;
-                    if((*now_it).cmdType!=S_FIELD_BEGIN&&(*now_it).cmdType!=S_FIELD_END)
-                        (*now_it).cmdType=S_BLANK,(*now_it).lineNum=-1;//give all S_BLANK
-                    else
-                        if((*now_it).cmdType==S_FIELD_BEGIN)
-                            ++fieldCnt;
-                        else
-                            --fieldCnt;
-                }
-                fieldCnt=Loc_fieldCnt+1;
-                now_it=Loc_now_it;
-                break;
-            }
+                		}
+				if((*now_it).cmdType!=S_FIELD_END)
+				{
+				    fieldCnt=Loc_fieldCnt+1;
+				    now_it=Loc_now_it;
+				    break;
+				}
+				++now_it;
+				if((*now_it).cmdType!=S_FIELD_BEGIN)
+				{
+				    fieldCnt=Loc_fieldCnt+1;
+				    now_it=Loc_now_it;
+				    break;
+				}
+				++now_it;
+				++fieldCnt;
+				if((*now_it).cmdType!=S_ELSE)
+				{
+				    fieldCnt=Loc_fieldCnt+1;
+				    now_it=Loc_now_it;
+				    break;
+				}
+				while(fieldCnt!=Loc_fieldCnt)
+				{
+				    ++now_it;
+				    if((*now_it).cmdType!=S_FIELD_BEGIN&&(*now_it).cmdType!=S_FIELD_END)
+				        (*now_it).cmdType=S_BLANK,(*now_it).lineNum=-1;//全部置为S_BLANK
+				    else
+				    	if((*now_it).cmdType==S_FIELD_BEGIN)
+				            	++fieldCnt;
+				        else
+				        	--fieldCnt;
+				}
+				fieldCnt=Loc_fieldCnt+1;
+				now_it=Loc_now_it;
+				break;
+            		}
 		}
 		case S_ELSE:
 		{
@@ -354,10 +355,10 @@ int Calc(deque<statement>::iterator &now_it)
 }
 
 
-int processor_main()//If no error occurred, return 0.
+int processor_main()
 {
 	for(deque<statement>::iterator now_it=buf.begin();now_it!=buf.end();++now_it)
-        Calc(now_it);
-    return 0;
+        	Calc(now_it);
+    	return 0;
 }
 
