@@ -275,15 +275,14 @@ size_t recolic_frame::format_var_name(string *ps)
 		{
 			cOK = false;
 			char markch = (*ps)[cpl];
-			char markch_ = (*ps)[(cp ? cp : cp - 1)];
-			if (!(markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))
+			char markch_ = (*ps)[(cp ? cp - 1 : cp)];
+			if (!((markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) && 
+				(cp ? (markch_ == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) : true  )
+				))
 			{
-				if (!(markch_ == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))
-				{
-					cp = ps->find(usedHash[cter], cp + 1);
-					cpl = cp + usedHash[cter].size();
-					cOK = true;
-				}
+				cp = ps->find(usedHash[cter], cp + 1);
+				cpl = cp + usedHash[cter].size();
+				cOK = true;
 			}
 
 		} while (cOK);
