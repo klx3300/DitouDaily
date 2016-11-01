@@ -1,4 +1,4 @@
-
+//This is main frame by Recolic 
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -83,7 +83,7 @@ int main()
 {
 //	set_new_handler(global_new_handler);
 #undef ifstream
-	ifstream ifs("input.txt");
+	ifstream ifs("D:\\input.txt");
 #define ifstream wifstream
 	if (!ifs)
 		FRM_ERROR(3);
@@ -135,7 +135,7 @@ int main()
 #ifdef RECOLIC_DEBUG
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
-		ofstream os("output.txt", ios::out);
+		ofstream os("D:\\output.txt", ios::out);
 		os << too;
 		os.close();
 	}
@@ -355,6 +355,7 @@ search_again:
 		{
 			auto last_ = remove_if(s.text.begin(), s.text.end(), [](char ch) -> bool {return ch == ' ';});//remove empty characters.
 			s.text.erase(last_, s.text.end());
+			pt = s.text.find(RECOLIC_TEXT("do"), 0);
 		}
 		if (s.text.size() > pt + 2)
 		{
