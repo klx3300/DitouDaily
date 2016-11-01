@@ -1,4 +1,4 @@
-//This is main frame by Recolic 
+﻿//This is main frame by Recolic 
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,7 +10,6 @@
 #include <map>
 #include <cctype>
 #include <sstream>
-#include <ciso646>
 #include "utf8.h"//支持UTF8和其他编码的转换
 #include "stdafx_.hpp"//公有头文件
 #include "analyser.hpp"//定义了解析器的过程
@@ -62,8 +61,6 @@ namespace recolic_frame//定义了只有框架中才用到的方法和变量，�
 			return RECOLIC_TEXT("S_IF");
 		case S_ELSE:
 			return RECOLIC_TEXT("S_ELSE");
-		case S_ELSE_IF:
-			return RECOLIC_TEXT("S_ELSE_IF");
 		case S_BREAK:
 			return RECOLIC_TEXT("S_BREAK");
 		case S_ERROR:
@@ -218,7 +215,7 @@ bool recolic_frame::is_var_name(const string &s)
 	//判断输入的字符串是否是一个合法的变量名
 	if (s.empty())
 		return false;
-	if (s == RECOLIC_TEXT("int") || s == RECOLIC_TEXT("if") || s == RECOLIC_TEXT("else") || s == RECOLIC_TEXT("for")|| s == RECOLIC_TEXT("break") || s == RECOLIC_TEXT("while") || 
+	if (s == RECOLIC_TEXT("int") || s == RECOLIC_TEXT("if") || s == RECOLIC_TEXT("else") || s == RECOLIC_TEXT("for") || s == RECOLIC_TEXT("break") || s == RECOLIC_TEXT("while") ||
 		s == RECOLIC_TEXT("do") || s == RECOLIC_TEXT("printf") || s == RECOLIC_TEXT("return"))
 		return false;
 	if (isdigit(s[0]))
@@ -274,11 +271,12 @@ size_t recolic_frame::format_var_name(string *ps)
 			cOK = false;
 			char markch = (*ps)[cpl];
 			char markch_ = (*ps)[(cp ? cp - 1 : cp)];
-			if (!((markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) && 
-				(cp ? (markch_ == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) : true  )
+			if (!((markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) &&
+#define M(ch) ||markch_==ch
+				(cp ? (markch_ == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) : true)
 				))
 			{
-				cp = ps->find(usedHash[cter], cp + 1);
+				cp = ps->find(usedHash[cter], cpl);
 				cpl = cp + usedHash[cter].size();
 				cOK = true;
 			}
