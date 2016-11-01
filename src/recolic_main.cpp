@@ -83,7 +83,7 @@ int main()
 {
 //	set_new_handler(global_new_handler);
 #undef ifstream
-	ifstream ifs("input.txt");
+	ifstream ifs("D:\\input.txt");
 #define ifstream wifstream
 	if (!ifs)
 		FRM_ERROR(3);
@@ -135,8 +135,7 @@ int main()
 #ifdef RECOLIC_DEBUG
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
-		ofstream os("output.txt", ios::out);
-		//utf8::utf16to8(too.begin(),too.end(),)
+		ofstream os("D:\\output.txt", ios::out);
 		os << too;
 		os.close();
 	}
@@ -279,7 +278,7 @@ size_t recolic_frame::format_var_name(string *ps)
 			char markch_ = (*ps)[(cp ? cp : cp - 1)];
 			if (!(markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))
 			{
-				if (!(markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))
+				if (!(markch_ == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))
 				{
 					cp = ps->find(usedHash[cter], cp + 1);
 					cpl = cp + usedHash[cter].size();
