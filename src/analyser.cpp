@@ -676,31 +676,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 		printf(RECOLIC_TEXT("MID END\n"));
 		printstack(*exprlist);
 		
-		// low reverse: = operator
 		
-		for(int i=ed-1;i>=st;i--){//low reverse
-			if(exprlist->get(i)->next!=NULL and exprlist->get(i)->item.type == TYPE_OPER and exprlist->get(i)->item.oper=='='){
-				// '=' operator detected.
-				ed-=2;
-				if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR && exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
-					assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i + 1)->item.number));
-					exprlist->get(i - 1)->item.number = exprlist->get(i + 1)->item.number;
-				}
-				else if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
-					assignStatement(ln, exprlist->get(i - 1)->item.number, itos(exprlist->get(i + 1)->item.number));
-					exprlist->get(i - 1)->item.number = exprlist->get(i + 1)->item.number;
-					exprlist->get(i - 1)->item.type = TYPE_OPERAND;
-				}
-				else {
-						// SyntaxErrorException
-				}
-				exprlist->remove(exprlist->get(i));
-				exprlist->remove(exprlist->get(i));
-			}
-			printf(RECOLIC_TEXT("LP\n"));
-		}
-		
-		printf(RECOLIC_TEXT("LP EXIT\n"));
 		for (int i = st;i <= ed;i++) {//low
 			if (exprlist->get(i)->item.type == TYPE_OPER and low_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
 				ed -= 2;
@@ -867,6 +843,31 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 		}
 		printf(RECOLIC_TEXT("LOW PR\n"));
 		printstack(*exprlist);
+		// low reverse: = operator
+		
+		for(int i=ed-1;i>=st;i--){//low reverse
+			if(exprlist->get(i)->next!=NULL and exprlist->get(i)->item.type == TYPE_OPER and exprlist->get(i)->item.oper=='='){
+				// '=' operator detected.
+				ed-=2;
+				if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR && exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
+					assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i + 1)->item.number));
+					exprlist->get(i - 1)->item.number = exprlist->get(i + 1)->item.number;
+				}
+				else if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
+					assignStatement(ln, exprlist->get(i - 1)->item.number, itos(exprlist->get(i + 1)->item.number));
+					exprlist->get(i - 1)->item.number = exprlist->get(i + 1)->item.number;
+					exprlist->get(i - 1)->item.type = TYPE_OPERAND;
+				}
+				else {
+						// SyntaxErrorException
+				}
+				exprlist->remove(exprlist->get(i));
+				exprlist->remove(exprlist->get(i));
+			}
+			printf(RECOLIC_TEXT("LP\n"));
+		}
+		
+		printf(RECOLIC_TEXT("LP EXIT\n"));
 		/*for (int i = st;i <= ed;i++) {//lowest
 			if (exprlist->get(i)->item.type == TYPE_OPER and last_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
 				ed -= 2;
