@@ -1,4 +1,4 @@
-//本头文件定义了非常重要的statement类
+﻿//本头文件定义了非常重要的statement类
 #pragma once
 #define _UNICODE
 #include <string>
@@ -10,7 +10,7 @@
 #endif
 using namespace std;//由于工程足够小，在头文件中包含这一条语句是比较方便的
 
-typedef enum { S_ERROR = -257, S_BLANK = 0, S_BLANK_BUT_OUTPUT, S_ASSIGN, S_FIELD_BEGIN, S_FIELD_END, S_GOTO, S_GOTO_DEST, S_IF, S_ELSE,S_ELSE_IF, S_BREAK } STATEMENT_T;
+typedef enum { S_ERROR = -257, S_BLANK = 0, S_BLANK_BUT_OUTPUT, S_ASSIGN, S_FIELD_BEGIN, S_FIELD_END, S_GOTO, S_GOTO_DEST, S_IF, S_ELSE, S_BREAK } STATEMENT_T;
 class statement
 {
 public:
