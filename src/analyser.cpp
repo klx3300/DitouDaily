@@ -409,7 +409,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					exprlist->get(ed)->item.number = -srctmpvar;
 				}
 				else {
-// // 					exprlist->get(ed)->item.number = -(exprlist->get(ed)->item.number);
+					exprlist->get(ed)->item.number = -(exprlist->get(ed)->item.number);
 				}
 				break;
 			default:
@@ -464,9 +464,10 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				printf(RECOLIC_TEXT("PROC NUMB:%d\n"),exprlist->get(i)->item.number);
 			if (exprlist->get(i)->prev->item.type == TYPE_OPERAND_VAR and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type != TYPE_OPERAND and exprlist->get(i)->next->item.type != TYPE_OPERAND_VAR)) {
 				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
-				ed--;
+				
 				switch (exprlist->get(i)->item.oper) {
 				case 'd':
+					ed--;
 					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
 						int srctmpvar = allocTempVar();
 						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
@@ -479,6 +480,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					exprlist->remove(exprlist->get(i));
 					break;
 				case 'i':
+					ed--;
 					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
 						int srctmpvar = allocTempVar();
 						assignStatement(ln, -srctmpvar, formatVarName(exprlist->get(i - 1)->item.number));
@@ -495,12 +497,14 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					break;
 				}
 				//exprlist->remove(exprlist->get(i));
+				//exprlist->remove(exprlist->get(ed+1));
 			}
 			if (exprlist->get(i)->prev->item.type == TYPE_OPER and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type == TYPE_OPERAND or exprlist->get(i)->next->item.type == TYPE_OPERAND_VAR)) {
 				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
-				ed--;
+				
 				switch (exprlist->get(i)->item.oper) {
 				case '-':
+					ed--;
 					//exprlist->get(i+1)->item.number=-(exprlist->get(i+1)->item.number);
 					if (exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
 						int srctmpvar = allocTempVar();
@@ -516,10 +520,11 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					
 					break;
 				}
+				printf(RECOLIC_TEXT("ax:"));
+				printstack(*exprlist);
 				
 			}
-			printf(RECOLIC_TEXT("ax:"));
-			printstack(*exprlist);
+			
 		}
 		exprlist->remove(exprlist->get(ed+1));
 		// priority from high to lowest
