@@ -14,6 +14,7 @@
 #include "stdafx_.hpp"
 #include "analyser.hpp"
 #include "processor.hpp"
+#define system(x); ;
 
 #define FRM_ERROR(error_code) { cout << "\nSoftware exception occurred at recolic_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define FRM_ERROR_(error_code) { cout << "\nSoftware exception occurred at recolic_main.cpp:Error code is " << error_code << endl; system("pause"); exit(error_code); }
@@ -83,7 +84,7 @@ int main()
 {
 //	set_new_handler(global_new_handler);
 #undef ifstream
-	ifstream ifs("D:\\input.txt");
+	ifstream ifs("input.txt");
 #define ifstream wifstream
 	if (!ifs)
 		FRM_ERROR(3);
@@ -135,7 +136,7 @@ int main()
 #ifdef RECOLIC_DEBUG
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
-		ofstream os("D:\\output.txt", ios::out);
+		ofstream os("output.txt", ios::out);
 		os << too;
 		os.close();
 	}
