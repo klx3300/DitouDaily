@@ -945,6 +945,13 @@ void commacalc(qLinkedList<item> *exprlist,int ln){
 	printf(RECOLIC_TEXT("COMMA START\n"));
 	for(int i=0;exprlist->get(i)!=NULL;i++){
 		if(exprlist->get(i)->item.type==TYPE_OPER && exprlist->get(i)->item.oper==','){
+			/*if(exprlist->first->item.type==TYPE_OPER && exprlist->first->item.oper=='D'){
+				item de;
+				de.type = TYPE_OPER;
+				de.oper = 'D';
+				exprlist->addBefore(exprlist->get(i),new qNode<item>(de));
+				i++;
+			}*/
 			item lb, rb;
 			lb.type = TYPE_OPER;
 			lb.oper = '(';
@@ -1055,8 +1062,11 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		case 'D':
 			for(int i=0;exprlist->get(i)!=NULL;i++){
 				if(exprlist->get(i)->item.type==TYPE_OPERAND_VAR){
-					if(exprlist->get(i+1)!=NULL && exprlist->get(i+1)->item.type==TYPE_OPER && exprlist->get(i+1)->item.oper=='=')
+					if(exprlist->get(i+1)!=NULL && exprlist->get(i+1)->item.type==TYPE_OPER && exprlist->get(i+1)->item.oper=='='){
 						defineStatement(ln, exprlist->get(i)->item.number);
+					}else if(exprlist->get(i-1)!=NULL && exprlist->get(i-1)->item.type==TYPE_OPER && (exprlist->get(i-1)->item.oper=='D' or exprlist->get(i-1)->item.oper==',') ){
+						defineStatement(ln,exprlist->get(i)->item.number);
+					}
 				}
 			}
 			exprlist->popfirst();
