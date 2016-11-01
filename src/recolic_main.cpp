@@ -276,13 +276,9 @@ size_t recolic_frame::format_var_name(string *ps)
 			cOK = false;
 			char markch = (*ps)[cpl];
 			char markch_ = (*ps)[(cp ? cp - 1 : cp)];
-<<<<<<< HEAD
-			if (!(markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))
-=======
 			if (!((markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) && 
 				(cp ? (markch_ == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')) : true  )
 				))
->>>>>>> c76d2f42c462deed0680d1de508d6365cf3f9dcc
 			{
 				cp = ps->find(usedHash[cter], cp + 1);
 				cpl = cp + usedHash[cter].size();
