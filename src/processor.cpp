@@ -98,7 +98,7 @@ int Calc(deque<statement>::iterator &now_it)
 					--fieldCnt;
 				if((*now_it_tmp).cmdType==S_FIELD_END)
 					++fieldCnt;
-				if((*now_it_tmp).cmdType==S_GOTO_DEST&&Loc_fieldCnt==fieldCnt)
+				if((*now_it_tmp).cmdType==S_GOTO_DEST&&fieldCnt==Loc_fieldCnt-1)
 				{
 					now_it=now_it_tmp;
                     fieldCnt=Loc_fieldCnt;
