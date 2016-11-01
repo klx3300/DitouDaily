@@ -10,39 +10,37 @@
 #include <map>
 #include <cctype>
 #include <sstream>
-#include "utf8.h"
-#include "stdafx_.hpp"
-#include "analyser.hpp"
-#include "processor.hpp"
-#define system(x); ;
+#include <ciso646>
+#include "utf8.h"//支持UTF8和其他编码的转换
+#include "stdafx_.hpp"//公有头文件
+#include "analyser.hpp"//定义了解析器的过程
+#include "processor.hpp"//定义了模拟CPU的过程
 
+//这里定义了通用的报错格式
 #define FRM_ERROR(error_code) { cout << "\nSoftware exception occurred at recolic_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define FRM_ERROR_(error_code) { cout << "\nSoftware exception occurred at recolic_main.cpp:Error code is " << error_code << endl; system("pause"); exit(error_code); }
 #define ANA_ERROR(error_code) { cout << "\nSoftware exception occurred at analyse_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define CPU_ERROR(error_code) { cout << "\nSoftware exception occurred at processor_main():Error code is " << error_code << endl; system("pause"); return error_code; }
-#define RECOLIC_DEBUG
+#define RECOLIC_DEBUG//这个开关控制是否输出调试信息
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-#include "w_fix.hpp"
+#include "w_fix.hpp"//必须最后包含的头文件
 using namespace std;
 
-deque<statement> input_buf;
-deque<statement> buf;
-vector<int> print_buffer;
-int *pMemory = nullptr;
-//void __cdecl global_new_handler();
+deque<statement> input_buf;//主框架负责填充这个容器，把稍微格式化的语句传给解析器
+deque<statement> buf;//这是解析器处理过的可以由模拟CPU直接运行的语句的容器
+vector<int> print_buffer;//这里存放模拟CPU执行的语句顺序(没有除去重复的语句序号)
+int *pMemory = nullptr;//指向虚拟内存空间的指针
 
-namespace recolic_frame
+namespace recolic_frame//定义了只有框架中才用到的方法和变量，习惯性防止冲突
 {
+	//此处的很多函数的注释直接看main(wmain)函数内的注释
 	void cut_comment(string *);
-	bool is_var_name(const string &);
+	bool is_var_name(const string &);//判断传入的字符串是否可能是一个有效的变量名(而不是保留字或运算符或常量数)
 	size_t format_var_name(string *);
-	bool current_line_is_comment = false;
-	map<string, int> buf_map;
-	std::vector<std::string> DivideString(const std::string &tod);
-	string formatH(int i)
+	bool current_line_is_comment = false;//标记当前正在读取的行是否是多行注释的一部分，便于移除多行的注释
+	map<string, int> buf_map;//定义了变量名字和虚拟内存地址的映射表
+	std::vector<std::string> DivideString(const std::string &tod);//这个方法由一个分割字符串的函数修改而来
+	string formatH(int i)//这个函数是为了在调试的时候将数字转换成宏的名字，便于调试
 	{
 		switch (i)
 		{
@@ -74,41 +72,40 @@ namespace recolic_frame
 			return RECOLIC_TEXT("ERROR_NOTFOUNT");
 		}
 	}
-	void fuck_do_while();
+	void fuck_do_while();//特殊需求：修改do-while的格式
 #undef ifstream
-	wstring _ugetline(ifstream &);
+	wstring _ugetline(ifstream &);//临时取消了ifstream到wifstream的宏定义，便于进行ANSI、UTF8、UNICODE的灵活操作
 #define ifstream wifstream
 }
 
 int main()
 {
-//	set_new_handler(global_new_handler);
 #undef ifstream
-	ifstream ifs("input.txt");
+	ifstream ifs("input.txt");//临时取消了ifstream到wifstream的宏定义，便于进行ANSI、UTF8、UNICODE的灵活操作
 #define ifstream wifstream
-	if (!ifs)
+	if (!ifs)//文件打开失败？
 		FRM_ERROR(3);
-	string frm_tmp_buf_;
+	string frm_tmp_buf_;//实际上是wstring,详情看w_fix.hpp
 	int frm_lineNum = 1;
 	while (!ifs.eof())
 	{
-		frm_tmp_buf_ = recolic_frame::_ugetline(ifs);
-		recolic_frame::cut_comment(&frm_tmp_buf_);
-		recolic_frame::format_var_name(&frm_tmp_buf_);
-		input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
+		frm_tmp_buf_ = recolic_frame::_ugetline(ifs);//读到一行
+		recolic_frame::cut_comment(&frm_tmp_buf_);//把注释砍掉(包括单行，多行，行内，\t，\r，且会把printf第一个参数直接击杀)
+		recolic_frame::format_var_name(&frm_tmp_buf_);//把各种变量名字统一格式化为 _____##@@ 加上一个数字
+		input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));//把处理的差不多的这行文本写入input_buf，准备传给解析器，原始行号在这时和语句绑定
 		++frm_lineNum;
 	}
-	ifs.close();
-	recolic_frame::fuck_do_while();
-#ifdef RECOLIC_DEBUG
+	ifs.close();//打开的文件要关闭
+	recolic_frame::fuck_do_while();//把解析器的do-while的一点问题解决，详见本函数的内容的注释
+#ifdef RECOLIC_DEBUG//输出调试信息
 	for (size_t cter = 0;cter < input_buf.size();++cter)
 	{
 		cout << input_buf[cter].lineNum << RECOLIC_TEXT("> ") << input_buf[cter].text << endl;
 	}
 	cout << RECOLIC_TEXT("********************************\nNow try to launch Compiler...\n") << endl;
 #endif
-	int analyse_error_code = analyse_main();
-#ifdef RECOLIC_DEBUG
+	int analyse_error_code = analyse_main();//调用解析器回调函数并取得错误码
+#ifdef RECOLIC_DEBUG//输出调试信息
 	for (size_t cter = 0;cter < buf.size();++cter)
 	{
 		cout << buf[cter].lineNum << RECOLIC_TEXT("|") << recolic_frame::formatH(buf[cter].cmdType) << RECOLIC_TEXT("> ") << buf[cter].text << endl;
@@ -117,10 +114,10 @@ int main()
 #endif
 	if (analyse_error_code)
 		ANA_ERROR(analyse_error_code);
-	int processor_error_code = processor_main();
+	int processor_error_code = processor_main();//调用虚拟CPU回调函数并取得错误码
 	if (processor_error_code)
 		CPU_ERROR(processor_error_code);
-	{ //Final deal
+	{ //先去掉连续重复的行号
 		int last_success = -1;
 		stringstream ss;
 		for (size_t cter = 0;cter < print_buffer.size();++cter)
@@ -133,13 +130,13 @@ int main()
 		}
 		string too = ss.str();
 		too = too.substr(0, too.size() - 1);
-#ifdef RECOLIC_DEBUG
+#ifdef RECOLIC_DEBUG//输出调试信息
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
-		ofstream os("output.txt", ios::out);
+		ofstream os("output.txt", ios::out);//输出结果
 		os << too;
 		os.close();
-	}
+	}//程序不暂停
 	return 0;
 }
 
@@ -340,8 +337,10 @@ std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
 	return sbuf;
 }
 
+
 void recolic_frame::fuck_do_while()
 {
+	//把所有的do自动和下一行(或者隔几个回车)的左花括号连接起来
 	auto last = remove_if(input_buf.begin(), input_buf.end(), [](const statement &s) -> bool {return s.text.empty();});//remove empty lines.
 	input_buf.erase(last, input_buf.end());
 	bool must_erase = false;
@@ -376,6 +375,7 @@ search_again:
 #undef ifstream
 #undef string
 #undef char
+//临时取消了ifstream到wifstream的宏定义，便于进行ANSI、UTF8、UNICODE的灵活操作
 wstring recolic_frame::_ugetline(ifstream &is)
 {
 	char buf[256] = { 0 };
