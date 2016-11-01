@@ -9,6 +9,7 @@ string itos(int i) {
 	return os.str();
 }
 
+//将数字变量代号转为变量名称
 string formatVarName(int varname) {
 	return RECOLIC_TEXT("_____##@@") + itos(varname);
 }
@@ -219,10 +220,12 @@ item::item() {
 	oper = 0;
 }
 //void bfcalc(qLinkedList<item> *exprlist,int start,int end,int lnnumber);
-int currIndex = 0; // now analysis pointer position
-bool tmpvars[65536];
+int currIndex = 0; // 解析器正在解析的index
+bool tmpvars[65536];// processor临时变量占用状态
 
-qLinkedList<bool *> vstack;
+qLinkedList<bool *> vstack;//作用域变量状态栈（按代号存储）
+
+//新作用域入栈
 void vstack_new_field(){
 	bool *variables=new bool[65536];
 	for(int i=0;i<65536;i++){
@@ -230,16 +233,21 @@ void vstack_new_field(){
 	}
 	vstack.addfirst(variables);
 };
+
+//作用域结束出栈
 void vstack_pop_field(){
 	delete[] vstack.first->item;
 	vstack.popfirst();
 };
 
+//清除processor临时变量状态
 void clearTempVarFlags() {
 	for (int i = 0;i<256;i++) {
 		tmpvars[i] = false;
 	}
 }
+
+//申请processor临时变量
 int allocTempVar() {
 	// search for avaliable tmpvar
 	for (int i = 1;i<256;i++) {
@@ -250,21 +258,28 @@ int allocTempVar() {
 	}
 	return -1;
 }
+
+//释放已经使用的processor临时变量
 void freeTempVar(int i) {
 	tmpvars[i] = false;
 }
 
-
+//当前GOTO语句在栈中位置
 int goto_level = -1;
 
+//增加一层GOTO
 int allocGotoTag() {
 	return goto_level--;
 }
 
+//重置GOTO位置
 void resetGotoTag() {
 	goto_level = -1;
 }
 
+/*定义变量。
+ *首先检测该变量是否首次定义，避免重复定义。
+ */
 void defineStatement(int ln, int varname) {
 	if(varname<0){
 		string tmpstr(RECOLIC_TEXT(""));
@@ -286,12 +301,14 @@ void defineStatement(int ln, int varname) {
 	}
 }
 
+
+//赋值语句。
 void assignStatement(int ln, int varname, string simplest) {
 	string tmpstr(RECOLIC_TEXT("_____##@@") + itos(varname) + RECOLIC_TEXT(" = ") + simplest);
 	statement s(ln, tmpstr, S_ASSIGN);
 	buf.push_back(s);
 }
-
+//作用域语句
 void fieldStatement(int ln, STATEMENT_T type) {
 	if(type==S_FIELD_BEGIN){
 		vstack_new_field();
@@ -301,70 +318,48 @@ void fieldStatement(int ln, STATEMENT_T type) {
 	statement s(ln, RECOLIC_TEXT(""), type);
 	buf.push_back(s);
 }
-
+// 跳转语句
 void gotoStatement(int ln) {
 	statement s(ln, RECOLIC_TEXT(""), S_GOTO);
 	buf.push_back(s);
 }
-
+// 跳转语句的目标语句
 void gotodestStatement(int ln) {
 	statement s(ln, RECOLIC_TEXT(""), S_GOTO_DEST);
 	buf.push_back(s);
 }
-
+// 条件判断语句
 void ifStatement(int ln, string expr) {
 	statement s(ln, expr, S_IF);
 	buf.push_back(s);
 }
-
+// ELSE语句
 void elseStatement(int ln) {
 	statement s(ln, RECOLIC_TEXT(""), S_ELSE);
 	buf.push_back(s);
 }
-
+// 输出语句
 void printStatement(int ln) {
 	statement s(ln, RECOLIC_TEXT(""), S_BLANK_BUT_OUTPUT);
 	buf.push_back(s);
 };
-
+// 跳出循环语句
 void breakStatement(int ln) {
 	statement s(ln, RECOLIC_TEXT(""), S_BREAK);
 	buf.push_back(s);
 };
 
+//item类型可能取值
+const int TYPE_OPER = 1;//运算符
+const int TYPE_OPERAND = 2;//立即数
+const int TYPE_OPERAND_VAR = 3;//变量
 
-/* imzhwk created analyser
-* cmdType��Ӧtext�е��������£�
-S_ERROR ������
-S_BLANK,������
-S_BLANK_BUT_OUTPUT,������
-S_ASSIGN,������һ�������ַ������������ŷֺ�
-S_FIELD_BEGIN,������
-S_FIELD_END,������
-S_GOTO,Ŀ��GOTO_DEST�ṹ���Ǹ�������lineNum��ֵ(����Ϊ��)
-S_GOTO_DEST,������
-S_IF,if�����ڵ��Ǹ�ʽ��
-S_ELSE_IF,if�����ڵ��Ǹ�ʽ��
-S_ELSE,������
-*/
-
-
-const int TYPE_OPER = 1;
-const int TYPE_OPERAND = 2;
-const int TYPE_OPERAND_VAR = 3;
-
-/*���ѣ��к�����Ԥ���ؼ�����
-int if else for break while do \r\n \t printf return
-+ - * / ++ --
-> < = == >= <= !=
-, ; "" '' ( ) //  /.../ { }
-_____##@@...*/
-
-string last_priority(RECOLIC_TEXT(","));
-string low_priority(RECOLIC_TEXT("= e > < L S n ")); // equate & inequate operators
+string last_priority(RECOLIC_TEXT(","));//最低优先级
+string low_priority(RECOLIC_TEXT("= e > < L S n ")); // 以此类推
 string mid_priority(RECOLIC_TEXT("+-"));
 string high_priority(RECOLIC_TEXT("*/"));
 
+// 运算符对应表
 // operator 'd' indicates -- operator
 // operator 'i' indicates ++ operator
 // operator 'e' indicates == operator
@@ -372,7 +367,7 @@ string high_priority(RECOLIC_TEXT("*/"));
 // operator 'S' indicates <= operator
 // operator 'n' indicates != operator
 
-
+// 调试输出
 void printstack(qLinkedList<item> exprlist) {
 	for (int i = 0;i<exprlist.size();i++) {
 		switch (exprlist.get(i)->item.type) {
@@ -393,7 +388,7 @@ void printstack(qLinkedList<item> exprlist) {
 }
 
 
-//bracket-free part
+//解析无括号语句
 void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 	// income example:( expr... )
 	int st = start + 1, ed = end - 1, ln = lnnumber;
@@ -879,7 +874,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 	}
 }
 
-
+//去除语句中所有括号
 void debracket_process(qLinkedList<item> *exprlist, int ln) {
 	bool havebrackets = true;
 	int firstplace = -1;
@@ -909,7 +904,7 @@ void debracket_process(qLinkedList<item> *exprlist, int ln) {
 		}
 	}
 }
-
+// 在语句两端加上括号方便bfcalc()解析
 void rebracket_process(qLinkedList<item> *exprlist, int ln) {
 	item lb, rb;
 	lb.type = TYPE_OPER;
@@ -920,7 +915,7 @@ void rebracket_process(qLinkedList<item> *exprlist, int ln) {
 	exprlist->addlast(rb);
 	bfcalc(exprlist, 0, exprlist->size() - 1, ln);
 }
-
+// 逗号运算符解析
 void commacalc(qLinkedList<item> *exprlist,int ln){
 	printf(RECOLIC_TEXT("COMMA START\n"));
 	for(int i=0;exprlist->get(i)!=NULL;i++){
@@ -945,7 +940,7 @@ void commacalc(qLinkedList<item> *exprlist,int ln){
 	debracket_process(exprlist,ln);
 };
 
-// having the brackets part
+// 保留字对应表
 // operator D -> int
 // operator J -> if
 // operator W -> while loop
@@ -956,11 +951,11 @@ void commacalc(qLinkedList<item> *exprlist,int ln){
 // operator o -> do
 // when sent in,';' in the end of statement is removed!
 
-// true: didn't close normally(using '{' & '}')
+// 作用域栈元素类型
 const int FIELD_NORMAL_TRUE = 0, FIELD_NORMAL_FALSE = 1, FIELD_LOOP_TRUE = 2, FIELD_LOOP_FALSE = 3, FIELD_DLOOP = 4,FIELD_ELSE=5;
-
+// 作用域栈
 qLinkedList<int> fieldStack;
-
+// 检测作用域是否正常关闭，若没有则关闭
 void check_stack_closure_normal(int ln,bool FLAG_CHECKELSE=true){
 	printf(RECOLIC_TEXT("LN>%d invoked close stack\n"),ln);
 	
@@ -1018,8 +1013,9 @@ void check_stack_closure_normal(int ln,bool FLAG_CHECKELSE=true){
 	}
 }
 
+//带关键字表达式处理
 void rcalc(qLinkedList<item> *exprlist, int ln) {
-	/* possible sing_line expressions are:
+	/* 可能存在的所有关键字形式（大略版）:
 	* D varname = expression(or just close)
 	* W expression
 	* F expression ; expression ; expression
@@ -1302,7 +1298,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 	}
 	clearTempVarFlags();
 }
-
+//将字符串转为整数
 int qatoi(string str) {
 	if (str[0] == '.')
 		str = RECOLIC_TEXT("0") + str;
@@ -1311,11 +1307,13 @@ int qatoi(string str) {
 	return stoi(str);
 }
 
+//有效数字字符
 string valid_numbers(RECOLIC_TEXT("1234567890"));
 
+//括号栈类型
 const int BRACKET_FLAG_NOLOOP = -1, BRACKET_FLAG_LOOP = 0, BRACKET_FLAG = 1;
 
-// convert deque<statement> into qLinkedLists and send to rcalc()
+// 将 deque<statement> 转换为解析器标准解析类型 qLinkedLists 并传给 rcalc()
 
 // when detected any cond or loop statements,use bracket-stack to check the close of this statement.
 // when meet { or } , close statement immediately.the close result must include { or } itself.
@@ -1592,6 +1590,7 @@ void genExpr() {
 	vstack_pop_field();
 }
 
+// 主框架入口函数
 int analyse_main() {
 	// deque<statement> buf is input global var
 	// all un-analysed statement is typed as S_ERROR
