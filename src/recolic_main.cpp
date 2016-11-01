@@ -83,7 +83,7 @@ int main()
 {
 //	set_new_handler(global_new_handler);
 #undef ifstream
-	ifstream ifs(RECOLIC_TEXT("input.txt"));
+	ifstream ifs("input.txt");
 #define ifstream wifstream
 	if (!ifs)
 		FRM_ERROR(3);
@@ -135,7 +135,7 @@ int main()
 #ifdef RECOLIC_DEBUG
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
-		ofstream os(RECOLIC_TEXT("output.txt"), ios::out);
+		ofstream os("output.txt", ios::out);
 		os << too;
 		os.close();
 	}

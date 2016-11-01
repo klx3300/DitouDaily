@@ -3,7 +3,7 @@
 #else
 #define RECOLIC_TEXT(txt) txt
 #endif
-#define main wmain
+//#define main wmain
 #define string wstring
 #define to_string to_wstring
 #define stringstream wstringstream
