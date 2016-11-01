@@ -17,6 +17,7 @@ template<class T>
 class qNode {
 public:
 	qNode();
+	qNode(T titem);
 	T item;
 	qNode<T>* next;
 	qNode<T>* prev;
@@ -26,6 +27,12 @@ template<class T>
 qNode<T>::qNode() {
 	next = NULL;
 	prev = NULL;
+}
+template<class T>
+qNode<T>::qNode(T titem){
+	item=titem;
+	next=NULL;
+	prev=NULL;
 }
 template <class T>
 class qLinkedList {
@@ -841,7 +848,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 		}
 		printf(RECOLIC_TEXT("LOW PR\n"));
 		printstack(*exprlist);
-		for (int i = st;i <= ed;i++) {//lowest
+		/*for (int i = st;i <= ed;i++) {//lowest
 			if (exprlist->get(i)->item.type == TYPE_OPER and last_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
 				ed -= 2;
 				switch (exprlist->get(i)->item.oper) {
@@ -865,7 +872,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				exprlist->remove(exprlist->get(i));
 				i--;
 			}
-		}
+		}*/
 		exprlist->remove(exprlist->get(start));
 		//printstack(*exprlist);
 		//printf("size:%d\n",exprlist->size());
@@ -913,6 +920,31 @@ void rebracket_process(qLinkedList<item> *exprlist, int ln) {
 	exprlist->addlast(rb);
 	bfcalc(exprlist, 0, exprlist->size() - 1, ln);
 }
+
+void commacalc(qLinkedList<item> *exprlist,int ln){
+	printf(RECOLIC_TEXT("COMMA START\n"));
+	for(int i=0;exprlist->get(i)!=NULL;i++){
+		if(exprlist->get(i)->item.type==TYPE_OPER && exprlist->get(i)->item.oper==','){
+			item lb, rb;
+			lb.type = TYPE_OPER;
+			lb.oper = '(';
+			rb.type = TYPE_OPER;
+			rb.oper = ')';
+			exprlist->addAfter(exprlist->get(i),new qNode<item>(lb));
+			exprlist->addBefore(exprlist->get(i),new qNode<item>(rb));
+			i++;
+		}
+	}
+	item lb, rb;
+	lb.type = TYPE_OPER;
+	lb.oper = '(';
+	rb.type = TYPE_OPER;
+	rb.oper = ')';
+	exprlist->addfirst(lb);
+	exprlist->addlast(rb);
+	debracket_process(exprlist,ln);
+};
+
 // having the brackets part
 // operator D -> int
 // operator J -> if
@@ -1008,8 +1040,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			}
 			exprlist->popfirst();
 			printstack(*exprlist);
-			debracket_process(exprlist, ln);
-			rebracket_process(exprlist, ln);
+			commacalc(exprlist,ln);
 			//if(FLAG_CHECKCLOSE)
 				check_stack_closure_normal(ln);
 			break;
@@ -1018,8 +1049,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			fieldStatement(ln, S_FIELD_BEGIN);
 			if (exprlist->last->item.oper == '{') {
 				exprlist->poplast();
-				debracket_process(exprlist, ln);
-				rebracket_process(exprlist, ln);
+				commacalc(exprlist,ln);
 				if(exprlist->first->item.type==TYPE_OPERAND){
 					ifStatement(ln, itos(exprlist->first->item.number));
 				}else{
@@ -1028,8 +1058,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				fieldStack.addfirst(FIELD_NORMAL_FALSE);
 			}
 			else {
-				debracket_process(exprlist, ln);
-				rebracket_process(exprlist, ln);
+				commacalc(exprlist, ln);
 				if(exprlist->first->item.type==TYPE_OPERAND){
 					ifStatement(ln, itos(exprlist->first->item.number));
 				}else{
@@ -1047,8 +1076,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				if (exprlist->last->item.oper == '{') {
 					exprlist->poplast();
 					gotodestStatement(ln);
-					debracket_process(exprlist, ln);
-					rebracket_process(exprlist, ln);
+					commacalc(exprlist, ln);
 					fieldStack.addfirst(FIELD_NORMAL_FALSE);
 					fieldStatement(ln,S_FIELD_BEGIN);
 					if(exprlist->first->item.type==TYPE_OPERAND){
@@ -1060,8 +1088,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				}
 				else {
 					gotodestStatement(ln);
-					debracket_process(exprlist, ln);
-					rebracket_process(exprlist, ln);
+					commacalc(exprlist, ln);
 					fieldStack.addfirst(FIELD_NORMAL_TRUE);
 					fieldStatement(ln,S_FIELD_BEGIN);
 					if(exprlist->first->item.type==TYPE_OPERAND){
@@ -1076,8 +1103,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				// is a do-while loop!
 				fieldStack.popfirst();
 				exprlist->popfirst();
-				debracket_process(exprlist, ln);
-				rebracket_process(exprlist, ln);
+				commacalc(exprlist, ln);
 				if(exprlist->first->item.type==TYPE_OPERAND){
 					ifStatement(ln, itos(exprlist->first->item.number));
 				}else{
@@ -1124,12 +1150,10 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
 				ifStatement(ln, formatVarName(-998));
-				debracket_process(&iterexpr, ln);
-				rebracket_process(&iterexpr, ln);
+				commacalc(&iterexpr, ln);
 				fieldStatement(ln, S_FIELD_END);
 				assignStatement(ln, -998, RECOLIC_TEXT("1"));
-				debracket_process(&condexpr, ln);
-				rebracket_process(&condexpr, ln);
+				commacalc(&condexpr, ln);
 				//printstack(initexpr);
 				
 				fieldStatement(ln,S_FIELD_BEGIN);
@@ -1153,21 +1177,16 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 					}
 					initexpr.popfirst();
 					//printstack(initexpr);
-					debracket_process(&initexpr, ln);
-					rebracket_process(&initexpr, ln);
+					commacalc(&initexpr, ln);
 				}
 				assignStatement(ln, -998, RECOLIC_TEXT("0"));
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
 				ifStatement(ln,formatVarName(-998));
-				printstack(iterexpr);
-				debracket_process(&iterexpr, ln);
-				printstack(iterexpr);
-				rebracket_process(&iterexpr, ln);
+				commacalc(&iterexpr, ln);
 				fieldStatement(ln, S_FIELD_END);
 				assignStatement(ln, -998, RECOLIC_TEXT("1"));
-				debracket_process(&condexpr, ln);
-				rebracket_process(&condexpr, ln);
+				commacalc(&condexpr, ln);
 				
 				fieldStatement(ln,S_FIELD_BEGIN);
 				if(condexpr.first->item.type==TYPE_OPERAND){
@@ -1262,8 +1281,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		default:
 			// that's a statement that have no meanings!
 			// but we still have to execute it due to the fucking requirements!
-			debracket_process(exprlist, ln);
-			rebracket_process(exprlist, ln);
+			commacalc(exprlist, ln);
 			//if(FLAG_CHECKCLOSE)
 				check_stack_closure_normal(ln);
 			// check if last didn't use } to close field.
@@ -1275,8 +1293,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 	}
 	else {
 		// that indicates it's an very simple assign statement(but may have brackets!).
-		debracket_process(exprlist, ln);
-		rebracket_process(exprlist, ln);
+		commacalc(exprlist, ln);
 		// check if last didn't use } to close field.
 		// true: didn't close normally(using '{' & '}')
 		// and commit close.
