@@ -136,7 +136,7 @@ int main()
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
 		ofstream os(RECOLIC_TEXT("output.txt"), ios::out);
-		utf8::utf16to8(too.begin(),too.end(),)
+		//utf8::utf16to8(too.begin(),too.end(),)
 		os << too;
 		os.close();
 	}
