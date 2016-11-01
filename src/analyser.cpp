@@ -458,10 +458,10 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 		//exprlist->remove(exprlist->get(end));
 		// check unary
 		for (int i = st;i <= ed;i++) {
-			if(exprlist->get(i)->item.type==TYPE_OPER)
+			/*if(exprlist->get(i)->item.type==TYPE_OPER)
 				printf(RECOLIC_TEXT("PROC OPER:%c\n"),exprlist->get(i)->item.oper);
 			else
-				printf(RECOLIC_TEXT("PROC NUMB:%d\n"),exprlist->get(i)->item.number);
+				printf(RECOLIC_TEXT("PROC NUMB:%d\n"),exprlist->get(i)->item.number);*/
 			if (exprlist->get(i)->prev->item.type == TYPE_OPERAND_VAR and exprlist->get(i)->item.type == TYPE_OPER and (exprlist->get(i)->next->item.type != TYPE_OPERAND and exprlist->get(i)->next->item.type != TYPE_OPERAND_VAR)) {
 				//printf("unary oper:%c\n",exprlist->get(i)->item.oper);
 				
@@ -610,6 +610,8 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				i--;
 			}
 		}
+		printf(RECOLIC_TEXT("HIG END\n"));
+		printstack(*exprlist);
 		for (int i = st;i <= ed;i++) {//mid
 			if (exprlist->get(i)->item.type == TYPE_OPER and mid_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
 				ed -= 2;
@@ -670,6 +672,8 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				i--;
 			}
 		}
+		//printstack(*exprlist);
+		printf(RECOLIC_TEXT("MID END\n"));
 		printstack(*exprlist);
 		for (int i = st;i <= ed;i++) {//low
 			if (exprlist->get(i)->item.type == TYPE_OPER and low_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
@@ -689,7 +693,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					else {
 						// SyntaxErrorException
 					}
-					printstack(*exprlist);
+					//printstack(*exprlist);
 					break;
 				case 'e':
 					//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
@@ -800,6 +804,8 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 					}
 					break;
 				default:
+					if(exprlist->get(i)->item.oper==',')
+						break;
 					//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
 					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR && exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
 						int srctmpvar = allocTempVar();
@@ -833,6 +839,8 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 				i--;
 			}
 		}
+		printf(RECOLIC_TEXT("LOW PR\n"));
+		printstack(*exprlist);
 		for (int i = st;i <= ed;i++) {//lowest
 			if (exprlist->get(i)->item.type == TYPE_OPER and last_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
 				ed -= 2;
@@ -921,14 +929,18 @@ const int FIELD_NORMAL_TRUE = 0, FIELD_NORMAL_FALSE = 1, FIELD_LOOP_TRUE = 2, FI
 
 qLinkedList<int> fieldStack;
 
-void check_stack_closure_normal(int ln){
+void check_stack_closure_normal(int ln,bool FLAG_CHECKELSE=true){
+	printf(RECOLIC_TEXT("LN>%d invoked close stack\n"),ln);
 	
 	if (fieldStack.popable() && fieldStack.first->item == FIELD_NORMAL_TRUE) {
 		// didn't close field normally!
 		// close it and pop the stack.
 		fieldStatement(ln, S_FIELD_END);
 		fieldStack.popfirst();
-		
+		while(FLAG_CHECKELSE && fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+			fieldStatement(ln, S_FIELD_END);
+			fieldStack.popfirst();
+		}
 		while (fieldStack.popable() && (fieldStack.first->item == FIELD_NORMAL_TRUE or fieldStack.first->item == FIELD_LOOP_TRUE)) {
 			switch(fieldStack.first->item){
 				case FIELD_NORMAL_TRUE:
@@ -945,7 +957,9 @@ void check_stack_closure_normal(int ln){
 					break;
 			}
 		}
-		while(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+		
+	}else if(fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
+		while(FLAG_CHECKELSE && fieldStack.popable() && fieldStack.first->item == FIELD_ELSE){
 			fieldStatement(ln, S_FIELD_END);
 			fieldStack.popfirst();
 		}
@@ -1023,6 +1037,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				}
 				fieldStack.addfirst(FIELD_NORMAL_TRUE);
 			}
+			fieldStatement(ln, S_FIELD_BEGIN);
+			fieldStack.addfirst(FIELD_NORMAL_TRUE);
 			break;
 		case 'W':
 			if (!fieldStack.popable() || fieldStack.first->item != FIELD_DLOOP) {
@@ -1095,7 +1111,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			for (int i = 1;exprlist->get(i)->next != NULL;exprlist->popfirst()) {
 				iterexpr.addlast(exprlist->get(i)->item);
 			}
-			printstack(initexpr);
+			//printstack(initexpr);
 			// qLinkedList<item> cpcondexpr(condexpr);
 			// these statements divided suc.
 			fieldStatement(ln, S_FIELD_BEGIN);
@@ -1114,7 +1130,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				assignStatement(ln, -998, RECOLIC_TEXT("1"));
 				debracket_process(&condexpr, ln);
 				rebracket_process(&condexpr, ln);
-				printstack(initexpr);
+				//printstack(initexpr);
 				
 				fieldStatement(ln,S_FIELD_BEGIN);
 				if(condexpr.first->item.type==TYPE_OPERAND){
@@ -1136,7 +1152,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 						}
 					}
 					initexpr.popfirst();
-					printstack(initexpr);
+					//printstack(initexpr);
 					debracket_process(&initexpr, ln);
 					rebracket_process(&initexpr, ln);
 				}
@@ -1144,7 +1160,9 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				gotodestStatement(ln);
 				fieldStatement(ln, S_FIELD_BEGIN);
 				ifStatement(ln,formatVarName(-998));
+				printstack(iterexpr);
 				debracket_process(&iterexpr, ln);
+				printstack(iterexpr);
 				rebracket_process(&iterexpr, ln);
 				fieldStatement(ln, S_FIELD_END);
 				assignStatement(ln, -998, RECOLIC_TEXT("1"));
@@ -1166,7 +1184,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			
 			printStatement(ln);
 			//if(FLAG_CHECKCLOSE)
-				check_stack_closure_normal(ln);
+				//check_stack_closure_normal(ln);
 			break;
 		case 'E':
 			fieldStatement(ln, S_FIELD_BEGIN);
@@ -1306,7 +1324,7 @@ void genExpr() {
 	// check start-up char directly.
 	for (int i = 0;i<expr.size();i++) {
 		readbuffer = expr[i];
-		printf(RECOLIC_TEXT("READ CHAR: %c\n"),readbuffer);
+		//printf(RECOLIC_TEXT("READ CHAR: %c\n"),readbuffer);
 		if (readbuffer != 0 and readbuffer != ' ') {
 			if (valid_numbers.find(readbuffer) != string::npos) {
 				if (expr[i - 1] == '@') {
