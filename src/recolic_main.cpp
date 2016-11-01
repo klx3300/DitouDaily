@@ -31,7 +31,7 @@ deque<statement> input_buf;
 deque<statement> buf;
 vector<int> print_buffer;
 int *pMemory = nullptr;
-void __cdecl global_new_handler();
+//void __cdecl global_new_handler();
 
 namespace recolic_frame
 {
@@ -81,14 +81,13 @@ namespace recolic_frame
 
 int main()
 {
-	set_new_handler(global_new_handler);
+//	set_new_handler(global_new_handler);
 #undef ifstream
-	ifstream ifs(RECOLIC_TEXT("D:\\visual studio 2015\\SeedCup2016\\Debug\\input.txt"));
+	ifstream ifs(RECOLIC_TEXT("input.txt"));
 #define ifstream wifstream
 	if (!ifs)
 		FRM_ERROR(3);
 	string frm_tmp_buf_;
-//	ifs.getline(frm_tmp_buf, 256);
 	int frm_lineNum = 1;
 	while (!ifs.eof())
 	{
@@ -97,12 +96,7 @@ int main()
 		recolic_frame::format_var_name(&frm_tmp_buf_);
 		input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
 		++frm_lineNum;
-//		ifs.getline(frm_tmp_buf, 256);
 	}
-//	frm_tmp_buf_ = frm_tmp_buf;
-//	recolic_frame::cut_comment(&frm_tmp_buf_);
-//	recolic_frame::format_var_name(&frm_tmp_buf_);
-//	input_buf.push_back(statement(frm_lineNum, frm_tmp_buf_, S_ERROR));
 	ifs.close();
 	recolic_frame::fuck_do_while();
 #ifdef RECOLIC_DEBUG
@@ -110,7 +104,7 @@ int main()
 	{
 		cout << input_buf[cter].lineNum << RECOLIC_TEXT("> ") << input_buf[cter].text << endl;
 	}
-	cout << "********************************\nNow try to launch Compiler...\n" << endl;
+	cout << RECOLIC_TEXT("********************************\nNow try to launch Compiler...\n") << endl;
 #endif
 	int analyse_error_code = analyse_main();
 #ifdef RECOLIC_DEBUG
@@ -141,7 +135,7 @@ int main()
 #ifdef RECOLIC_DEBUG
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
-		ofstream os(RECOLIC_TEXT("D:\\visual studio 2015\\SeedCup2016\\Debug\\output.txt"), ios::out);
+		ofstream os(RECOLIC_TEXT("output.txt"), ios::out);
 		os << too;
 		os.close();
 	}
@@ -296,12 +290,12 @@ size_t recolic_frame::format_var_name(string *ps)
 	return max_var_num;
 }
 
-void __cdecl global_new_handler()
+/*void __cdecl global_new_handler()
 {
 cout << "\nERROR:bad_alloc occurred! You need more memory!" << endl;
 system("pause");
 exit(1);
-}
+}*/
 
 #define I(ch) ||ich==ch
 std::vector<std::string> recolic_frame::DivideString(const std::string &tod)
@@ -382,6 +376,7 @@ wstring recolic_frame::_ugetline(ifstream &is)
 	string sbuf;
 	wstring wsbuf;
 	is.getline(buf, 256);
+	sbuf = buf;
 	utf8::utf8to16(sbuf.begin(), sbuf.end(), back_inserter(wsbuf));
 	if (!wsbuf.empty())
 	{
