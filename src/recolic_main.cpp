@@ -83,7 +83,7 @@ int main()
 {
 //	set_new_handler(global_new_handler);
 #undef ifstream
-	ifstream ifs("D:\\input.txt");
+	ifstream ifs("input.txt");
 #define ifstream wifstream
 	if (!ifs)
 		FRM_ERROR(3);
@@ -135,7 +135,7 @@ int main()
 #ifdef RECOLIC_DEBUG
 		cout << RECOLIC_TEXT("\nResult is here:") << too << endl;
 #endif
-		ofstream os("D:\\output.txt", ios::out);
+		ofstream os("output.txt", ios::out);
 		os << too;
 		os.close();
 	}
@@ -275,7 +275,7 @@ size_t recolic_frame::format_var_name(string *ps)
 		{
 			cOK = false;
 			char markch = (*ps)[cpl];
-			char markch_ = (*ps)[(cp ? cp : cp - 1)];
+			char markch_ = (*ps)[(cp ? cp - 1 : cp)];
 			if (!(markch == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))
 			{
 				if (!(markch_ == ' ' M('\0') M('-') M('*') M('/') M(';') M(',') M('.') M(')') M('(') M('+') M('>') M('<') M('=') M('{') M('}') M('"') M('?') M(':') M('!')))

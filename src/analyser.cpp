@@ -987,8 +987,10 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		switch (exprlist->first->item.oper) {
 		case 'D':
 			for(int i=0;exprlist->get(i)!=NULL;i++){
-				if(exprlist->get(i)->item.type==TYPE_OPERAND_VAR)
-					defineStatement(ln, exprlist->get(i)->item.number);
+				if(exprlist->get(i)->item.type==TYPE_OPERAND_VAR){
+					if(exprlist->get(i+1)!=NULL && exprlist->get(i+1)->item.type==TYPE_OPER && exprlist->get(i+1)->item.oper=='=')
+						defineStatement(ln, exprlist->get(i)->item.number);
+				}
 			}
 			exprlist->popfirst();
 			printstack(*exprlist);
@@ -1125,9 +1127,11 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			}
 			else {
 				if(initexpr.popable()){
-					for(int i=0;initexpr.get(i)!=NULL;i++){
-						if(initexpr.get(i)->item.type==TYPE_OPERAND_VAR)
-							defineStatement(ln, initexpr.get(i)->item.number);
+					for(int i=0;exprlist->get(i)!=NULL;i++){
+						if(exprlist->get(i)->item.type==TYPE_OPERAND_VAR){
+							if(exprlist->get(i+1)!=NULL && exprlist->get(i+1)->item.type==TYPE_OPER && exprlist->get(i+1)->item.oper=='=')
+								defineStatement(ln, exprlist->get(i)->item.number);
+						}
 					}
 					initexpr.popfirst();
 					printstack(initexpr);
