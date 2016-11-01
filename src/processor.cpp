@@ -1,4 +1,6 @@
 #include "processor.hpp"
+#include "w_fix.hpp"//必须最后包含w_fix.hpp
+
 
 int tempValue[65535];
 
@@ -118,7 +120,7 @@ int Calc(deque<statement>::iterator &now_it)
 			ss.clear();
 			ss<<now_state.text;
 			ss>>everyMember[0];
-			if(everyMember[0]=="int")
+			if(everyMember[0]==RECOLIC_TEXT("int"))
 			{
 				ss>>everyMember[1];
 				ss.clear();
@@ -188,36 +190,36 @@ int Calc(deque<statement>::iterator &now_it)
 					}
 					if(tmpValue[0]<0)
 					{
-						if(everyMember[2]=="+")
+						if(everyMember[2]== RECOLIC_TEXT("+"))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])+((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]=="-")
+						else if(everyMember[2]== RECOLIC_TEXT("-"))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])-((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]=="*")
+						else if(everyMember[2]== RECOLIC_TEXT("*"))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])*((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]=="/")
+						else if(everyMember[2]== RECOLIC_TEXT("/"))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])/((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]==">")
+						else if(everyMember[2]== RECOLIC_TEXT(">"))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])>((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]=="<")
+						else if(everyMember[2]== RECOLIC_TEXT("<"))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])<((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]==">=")
+						else if(everyMember[2]== RECOLIC_TEXT(">="))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])>=((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]=="<=")
+						else if(everyMember[2]== RECOLIC_TEXT("<="))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])<=((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]=="!=")
+						else if(everyMember[2]== RECOLIC_TEXT("!="))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])!=((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
-						else if(everyMember[2]=="==")
+						else if(everyMember[2]== RECOLIC_TEXT("=="))
 							tempValue[-tmpValue[0]]=((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])==((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]);
 					}
 					else
 					{
-						if(everyMember[2]=="+")
+						if(everyMember[2]== RECOLIC_TEXT("+"))
 							Give_Value(tmpValue[0],((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])+((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]));
-						else if(everyMember[2]=="-")
+						else if(everyMember[2]== RECOLIC_TEXT("-"))
 							Give_Value(tmpValue[0],((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])-((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]));
-						else if(everyMember[2]=="*")
+						else if(everyMember[2]== RECOLIC_TEXT("*"))
 							Give_Value(tmpValue[0],((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])*((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]));
-						else if(everyMember[2]=="/")
+						else if(everyMember[2]== RECOLIC_TEXT("/"))
 							Give_Value(tmpValue[0],((everyMember[1][0]=='_')?Get_Value_Double(tmpValue[1]):tmpValue[1])/((everyMember[3][0]=='_')?Get_Value_Double(tmpValue[3]):tmpValue[3]));
 					}
 				}

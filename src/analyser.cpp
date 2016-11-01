@@ -1,7 +1,7 @@
 #include "analyser.hpp"
 #define and &&
 #define or ||
-#include "w_fix.hpp"
+#include "w_fix.hpp"//必须最后包含w_fix.hpp
 
 string itos(int i) {
 	ostringstream os;
