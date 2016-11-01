@@ -1,8 +1,8 @@
 
 CPPFLAGS = -std=c++11
 
-main:recolic_main.o processor.o analyser.o
-	g++ $(CPPFLAGS) -o main recolic_main.o processor.o analyser.o
+SeedCup2016.exe:recolic_main.o processor.o analyser.o
+	g++ $(CPPFLAGS) -o SeedCup2016.exe recolic_main.o processor.o analyser.o
 
 recolic_main.o: recolic_main.cpp statements.hpp stdafx_.hpp
 	g++ $(CPPFLAGS) -c -o recolic_main.o recolic_main.cpp
@@ -15,4 +15,4 @@ analyser.o: analyser.cpp analyser.hpp statements.hpp stdafx_.hpp
 
 clean:
 	rm *.o
-	rm main
+	rm SeedCup2016.exe
