@@ -1,14 +1,12 @@
 #include "processor.hpp"
-#include "w_fix.hpp"//必须最后包含w_fix.hpp
+#include "w_fix.hpp"
 
-
-int tempValue[65535];
-
-map<int,pair<int,int> > allValue;//number cnt value
+int tempValue[65535];//temp values(which dont need define)
+map<int,pair<int,int> > allValue;//number fieldcnt value
 stringstream ss;//get every thing from the string
 int fieldCnt=0;//count how many field it has
 
-void New_Value(int Number)
+void New_Value(int Number)//define a new v with value 0
 {
     map<int,pair<int,int> >::iterator now=allValue.find(Number);
     if(now!=allValue.end()&&(*now).second.first!=-fieldCnt)
@@ -16,7 +14,7 @@ void New_Value(int Number)
 	allValue.insert(make_pair(Number,make_pair(-fieldCnt,0)));
 }
 
-int Give_Value(int Number,int Value)
+int Give_Value(int Number,int Value)//give number v with Value
 {
 	map<int,pair<int,int> >::iterator now=allValue.find(Number);
 	if(now==allValue.end())
@@ -26,13 +24,13 @@ int Give_Value(int Number,int Value)
 	return 0;
 }
 
-int Get_Value(int Number)
+int Get_Value(int Number)//get a v Value
 {
 	map<int,pair<int,int> >::iterator now=allValue.find(Number);
 	return (*now).second.second;
 }
 
-int Get_Value_Double(int Number)
+int Get_Value_Double(int Number)//get a v'Value from map or tempValue
 {
 	if(Number<0)
 		return tempValue[-Number];
@@ -42,7 +40,6 @@ int Get_Value_Double(int Number)
 
 int Calc(deque<statement>::iterator &now_it)
 {
-    //cout<<(*now_it).text<<endl;
 	statement now_state=(*now_it);
 	switch(now_state.cmdType)
 	{
@@ -63,40 +60,34 @@ int Calc(deque<statement>::iterator &now_it)
 		{
 			break;
 		}
-		case S_FIELD_BEGIN:
+		case S_FIELD_BEGIN://field of if else for while or do-while
 		{
 			++fieldCnt;
-            //printf("fieldbegin\n");
-			break;
+            break;
 		}
 		case S_FIELD_END:
 		{
 			--fieldCnt;
 			map<int,pair<int,int> >::iterator tmp;
-            //printf("fieldend\n");
-			for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
+            for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
 			{
-                //printf("erasefor\n");
-                //printf("%d %d %d\n",(*now).first,(*now).second.first,(*now).second.second);
-				if((*now).second.first<-fieldCnt)
+            	if((*now).second.first<-fieldCnt)
 				{
 					tmp=now;
 					++now;
-                    //printf("erase\n");
-					allValue.erase(tmp);
+            		allValue.erase(tmp);
 				}
 				else	
 					++now;
-			}
+			}//delete all the v in this field
 			break;
 		}
 		case S_GOTO:
 		{
 			int Loc_fieldCnt=fieldCnt;
-			for(deque<statement>::iterator now_it_tmp=now_it;now_it_tmp!=buf.begin();--now_it_tmp)
+			for(deque<statement>::iterator now_it_tmp=now_it;now_it_tmp!=buf.begin();--now_it_tmp)//find S_GOTO_DEST in the same field
 			{
-                //printf("%d::::%d %d %s\n",fieldCnt,(*now_it_tmp).cmdType,(*now_it_tmp).lineNum,(*now_it_tmp).text.c_str());
-				if((*now_it_tmp).cmdType==S_FIELD_BEGIN)
+ 				if((*now_it_tmp).cmdType==S_FIELD_BEGIN)
 					--fieldCnt;
 				if((*now_it_tmp).cmdType==S_FIELD_END)
 					++fieldCnt;
@@ -104,18 +95,16 @@ int Calc(deque<statement>::iterator &now_it)
 				{
 					now_it=now_it_tmp;
                     fieldCnt=Loc_fieldCnt;
-                    //puts("");
-					break;
+                    break;
 				}
 			}
-			//puts("");
 			fieldCnt=Loc_fieldCnt;
 			break;
 		}
 		case S_ASSIGN:
 		{
-            //printf("%d %d %s\n",(*now_it).cmdType,(*now_it).lineNum,(*now_it).text.c_str());
-			string everyMember[4];
+            //using stringstream to get numbers
+            string everyMember[4];
 			int tmpValue[4];
 			ss.clear();
 			ss<<now_state.text;
@@ -126,7 +115,6 @@ int Calc(deque<statement>::iterator &now_it)
 				ss.clear();
 				ss<<everyMember[1].substr(9);
 				ss>>tmpValue[0];
-				//cout<<tmpValue<<endl;
 				New_Value(tmpValue[0]);
 			}
 			else
@@ -228,6 +216,7 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_BREAK:
 		{
+            //find fieldend to break in the program
 			if(now_state.lineNum>0)
 				print_buffer.push_back(now_state.lineNum);
 			while((*now_it).cmdType!=S_GOTO)
@@ -237,7 +226,7 @@ int Calc(deque<statement>::iterator &now_it)
 					++fieldCnt;
 				if((*now_it).cmdType==S_FIELD_END)
 				{
-					--fieldCnt;
+					--fieldCnt;//check temp v
 					map<int,pair<int,int> >::iterator tmp;
 					for(map<int,pair<int,int> >::iterator now=allValue.begin();now!=allValue.end();)
 					{
@@ -281,7 +270,7 @@ int Calc(deque<statement>::iterator &now_it)
 				ss>>tmpValue;
 				flag=(tmpValue!=0);
 			}
-			if(!flag)
+			if(!flag)//if false
 			{
 				int Loc_fieldCnt=fieldCnt;
 				while(fieldCnt>Loc_fieldCnt-1)
@@ -308,64 +297,50 @@ int Calc(deque<statement>::iterator &now_it)
 				}
 				break;
 			}
-			else
+			else//if true
             {
-                //printf("go into else\n");
                 int Loc_fieldCnt=fieldCnt-1;
                 deque<statement>::iterator Loc_now_it=now_it;
                 while(fieldCnt!=Loc_fieldCnt&&now_it!=buf.end())
                 {
-                    //printf("gogogo\n");
-                    //printf("%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     ++now_it;
 					if((*now_it).cmdType==S_FIELD_BEGIN)
 						++fieldCnt;
 					if((*now_it).cmdType==S_FIELD_END)
 						--fieldCnt;
                 }
-                //printf("%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                 if((*now_it).cmdType!=S_FIELD_END)
                 {
-                    //printf("go away1\n");
-                    //printf("%d %d %d",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
                 }
                 ++now_it;
-                //printf("%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                 if((*now_it).cmdType!=S_FIELD_BEGIN)
                 {
-                    //printf("go away2\n");
-                    //printf("%d %d %d",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
                 }
-                //printf("\n %d \n",fieldCnt);
                 ++now_it;
                 ++fieldCnt;
                 if((*now_it).cmdType!=S_ELSE)
                 {
-                    //printf("go away3\n");
                     fieldCnt=Loc_fieldCnt+1;
                     now_it=Loc_now_it;
                     break;
                 }
-                //printf("%d\n",fieldCnt);
                 while(fieldCnt!=Loc_fieldCnt)
                 {
-                    //printf("%d %d\n",fieldCnt,Loc_fieldCnt);
                     ++now_it;
-                    //printf("cout:%d %d %d\n",fieldCnt,(*now_it).cmdType,(*now_it).lineNum);
                     if((*now_it).cmdType!=S_FIELD_BEGIN&&(*now_it).cmdType!=S_FIELD_END)
-                        (*now_it).cmdType=S_BLANK,(*now_it).lineNum=-1;
+                        (*now_it).cmdType=S_BLANK,(*now_it).lineNum=-1;//give all S_BLANK
                     else
                         if((*now_it).cmdType==S_FIELD_BEGIN)
                             ++fieldCnt;
                         else
                             --fieldCnt;
-                }//printf("k\n");
+                }
                 fieldCnt=Loc_fieldCnt+1;
                 now_it=Loc_now_it;
                 break;
@@ -373,8 +348,6 @@ int Calc(deque<statement>::iterator &now_it)
 		}
 		case S_ELSE:
 		{
-			//if(now_state.lineNum>0)
-			//	print_buffer.push_back(now_state.lineNum);
 			break;
 		}
 	}
@@ -383,21 +356,8 @@ int Calc(deque<statement>::iterator &now_it)
 
 int processor_main()//If no error occurred, return 0.
 {
-    //int cnt=0;
 	for(deque<statement>::iterator now_it=buf.begin();now_it!=buf.end();++now_it)
-    {
-        //if(++cnt>100)
-        //   break;
-        //if((*now_it).cmdType==S_IF)
-        //{
-            //printf("%s\n",(*now_it).text.c_str());
-        //    for(map<int,pair<int,int> >::iterator it=allValue.begin();it!=allValue.end();++it)
-        //        printf("%d %d %d\n",(*it).first,(*it).second.first,(*it).second.second);
-        //    puts("");
-        //}
-       // printf("%d %d %s\n",(*now_it).cmdType,(*now_it).lineNum,(*now_it).text.c_str());
-		Calc(now_it);
-    }
+        Calc(now_it);
     return 0;
 }
 
