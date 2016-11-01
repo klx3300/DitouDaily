@@ -1,4 +1,4 @@
-//This is main frame by Recolic 
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -144,7 +144,7 @@ int main()
 
 void recolic_frame::cut_comment(string *ps)
 {
-	//å…ˆæ€è·¨è¡Œæ³¨é‡Š
+	//ÏÈÉ±¿çĞĞ×¢ÊÍ
 	size_t comment_e = string::npos;
 	if (recolic_frame::current_line_is_comment)
 	{
@@ -162,7 +162,7 @@ void recolic_frame::cut_comment(string *ps)
 		}
 	}
 re_cut:
-	//å†æ€è¡Œå†…æ³¨é‡Š(è€ƒè™‘è·¨è¡Œ)
+	//ÔÙÉ±ĞĞÄÚ×¢ÊÍ(¿¼ÂÇ¿çĞĞ)
 	size_t comment_b = ps->find(RECOLIC_TEXT("/*"));
 	if (comment_b != string::npos)
 	{
@@ -180,7 +180,7 @@ re_cut:
 		}
 	}
 re_cut_:
-	//å†æ€åŒå¼•å·å†…å®¹
+	//ÔÙÉ±Ë«ÒıºÅÄÚÈİ
 	size_t quote_p = ps->find('"');
 	if (quote_p != string::npos)
 	{
@@ -206,10 +206,10 @@ re_cut_:
 		}
 	}
 gt_t_out:
-	//å†æ€åŒæ æ³¨é‡Š
+	//ÔÙÉ±Ë«¸Ü×¢ÊÍ
 	size_t qpq = ps->find(RECOLIC_TEXT("//"));
 	*ps = ps->substr(0, qpq);
-	//æ€å…‰\t\rå®Œäº‹
+	//É±¹â\t\rÍêÊÂ
 	auto last_it = remove_if(ps->begin(), ps->end(), [](char ch) -> bool { return ch == '\t' || ch == '\r'; });
 	ps->erase(last_it, ps->end());
 	return;
@@ -217,7 +217,7 @@ gt_t_out:
 
 bool recolic_frame::is_var_name(const string &s)
 {
-	//åˆ¤æ–­è¾“å…¥çš„å­—ç¬¦ä¸²æ˜¯å¦æ˜¯ä¸€ä¸ªåˆæ³•çš„å˜é‡å
+	//ÅĞ¶ÏÊäÈëµÄ×Ö·û´®ÊÇ·ñÊÇÒ»¸öºÏ·¨µÄ±äÁ¿Ãû
 	if (s.empty())
 		return false;
 	if (s == RECOLIC_TEXT("int") || s == RECOLIC_TEXT("if") || s == RECOLIC_TEXT("else") || s == RECOLIC_TEXT("for")|| s == RECOLIC_TEXT("break") || s == RECOLIC_TEXT("while") || 
@@ -244,8 +244,8 @@ bool recolic_frame::is_var_name(const string &s)
 #define M(ch) ||markch==ch
 size_t recolic_frame::format_var_name(string *ps)
 {
-	//ä»¥è¿ç®—ç¬¦å’Œç©ºæ ¼ä¸ºç•Œã€‚
-	//å…ˆæ„å»ºHashè¡¨
+	//ÒÔÔËËã·ûºÍ¿Õ¸ñÎª½ç¡£
+	//ÏÈ¹¹½¨Hash±í
 	vector<string> usedHash;
 	auto rets = DivideString(*ps);
 	static int max_var_num = 0;
@@ -265,7 +265,7 @@ size_t recolic_frame::format_var_name(string *ps)
 			usedHash.push_back(ts);
 		}
 	}
-	//å†æ ¹æ®Hashè¡¨æ›¿æ¢
+	//ÔÙ¸ù¾İHash±íÌæ»»
 	for (size_t cter = 0;cter < usedHash.size();++cter)
 	{
 		size_t cp = ps->find(usedHash[cter]);
@@ -363,7 +363,7 @@ search_again:
 		}
 		*pmust_erase = true;
 		return true;
-	});//å¯»æ‰¾éæ³•doè¯­å¥
+	});//Ñ°ÕÒ·Ç·¨doÓï¾ä
 	if (!must_erase)
 		return;
 	pst->text.erase(pst->text.end() - 2, pst->text.end());
