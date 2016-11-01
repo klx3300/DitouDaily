@@ -1025,6 +1025,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 					gotodestStatement(ln);
 					debracket_process(exprlist, ln);
 					rebracket_process(exprlist, ln);
+					fieldStack.addfirst(FIELD_NORMAL_FALSE);
+					fieldStatement(ln,S_FIELD_BEGIN);
 					if(exprlist->first->item.type==TYPE_OPERAND){
 						ifStatement(ln, itos(exprlist->first->item.number));
 					}else{
@@ -1036,6 +1038,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 					gotodestStatement(ln);
 					debracket_process(exprlist, ln);
 					rebracket_process(exprlist, ln);
+					fieldStack.addfirst(FIELD_NORMAL_TRUE);
+					fieldStatement(ln,S_FIELD_BEGIN);
 					if(exprlist->first->item.type==TYPE_OPERAND){
 						ifStatement(ln, itos(exprlist->first->item.number));
 					}else{
@@ -1110,8 +1114,8 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				}else{
 					ifStatement(ln, formatVarName(condexpr.first->item.number));
 				}
-				fieldStack.addfirst(FIELD_LOOP_FALSE);
-				fieldStack.addfirst(FIELD_NORMAL_TRUE);
+				fieldStack.addfirst(FIELD_NORMAL_FALSE);
+				fieldStack.addfirst(FIELD_LOOP_TRUE);
 			}
 			else {
 				if(initexpr.popable()){
