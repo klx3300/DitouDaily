@@ -353,7 +353,7 @@ const int TYPE_OPERAND = 2;//立即数
 const int TYPE_OPERAND_VAR = 3;//变量
 
 string last_priority(RECOLIC_TEXT(","));//最低优先级
-string low_priority(RECOLIC_TEXT("= e > < L S n ")); // 以此类推
+string low_priority(RECOLIC_TEXT("e > < L S n ")); // 以此类推
 string mid_priority(RECOLIC_TEXT("+-"));
 string high_priority(RECOLIC_TEXT("*/"));
 
@@ -675,11 +675,37 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 		//printstack(*exprlist);
 		printf(RECOLIC_TEXT("MID END\n"));
 		printstack(*exprlist);
+		
+		// low reverse: = operator
+		
+		for(int i=ed-1;i>=st;i--){//low reverse
+			if(exprlist->get(i)->next!=NULL and exprlist->get(i)->item.type == TYPE_OPER and exprlist->get(i)->item.oper=='='){
+				// '=' operator detected.
+				ed-=2;
+				if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR && exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
+					assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i + 1)->item.number));
+					exprlist->get(i - 1)->item.number = exprlist->get(i + 1)->item.number;
+				}
+				else if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR) {
+					assignStatement(ln, exprlist->get(i - 1)->item.number, itos(exprlist->get(i + 1)->item.number));
+					exprlist->get(i - 1)->item.number = exprlist->get(i + 1)->item.number;
+					exprlist->get(i - 1)->item.type = TYPE_OPERAND;
+				}
+				else {
+						// SyntaxErrorException
+				}
+				exprlist->remove(exprlist->get(i));
+				exprlist->remove(exprlist->get(i));
+			}
+			printf(RECOLIC_TEXT("LP\n"));
+		}
+		
+		printf(RECOLIC_TEXT("LP EXIT\n"));
 		for (int i = st;i <= ed;i++) {//low
 			if (exprlist->get(i)->item.type == TYPE_OPER and low_priority.find(exprlist->get(i)->item.oper) != std::string::npos) {
 				ed -= 2;
 				switch (exprlist->get(i)->item.oper) {
-				case '=':
+				/*case '=':
 					//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)+(exprlist->get(i+1)->item.number);
 					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR && exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
 						assignStatement(ln, exprlist->get(i - 1)->item.number, formatVarName(exprlist->get(i + 1)->item.number));
@@ -694,7 +720,7 @@ void bfcalc(qLinkedList<item> *exprlist, int start, int end, int lnnumber) {
 						// SyntaxErrorException
 					}
 					//printstack(*exprlist);
-					break;
+					break;*/
 				case 'e':
 					//exprlist->get(i-1)->item.number=(exprlist->get(i-1)->item.number)-(exprlist->get(i+1)->item.number);
 					if (exprlist->get(i - 1)->item.type == TYPE_OPERAND_VAR && exprlist->get(i + 1)->item.type == TYPE_OPERAND_VAR) {
