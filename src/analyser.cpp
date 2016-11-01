@@ -987,8 +987,10 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 		switch (exprlist->first->item.oper) {
 		case 'D':
 			for(int i=0;exprlist->get(i)!=NULL;i++){
-				if(exprlist->get(i)->item.type==TYPE_OPERAND_VAR)
-					defineStatement(ln, exprlist->get(i)->item.number);
+				if(exprlist->get(i)->item.type==TYPE_OPERAND_VAR){
+					if(exprlist->get(i+1)!=NULL && exprlist->get(i+1)->item.type==TYPE_OPER && exprlist->get(i+1)->item.oper=='=')
+						defineStatement(ln, exprlist->get(i)->item.number);
+				}
 			}
 			exprlist->popfirst();
 			printstack(*exprlist);
@@ -1078,7 +1080,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				initexpr.addlast(exprlist->get(i)->item);
 			}
 			exprlist->popfirst();
-			printstack(*exprlist);
+			//printstack(*exprlist);
 			for (int i = 1;exprlist->get(i)->item.oper != ';';exprlist->popfirst()) {
 				condexpr.addlast(exprlist->get(i)->item);
 			}
@@ -1088,12 +1090,12 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				it.number=1;
 				condexpr.addlast(it);
 			}
-			printstack(condexpr);
+			//printstack(condexpr);
 			exprlist->popfirst();
 			for (int i = 1;exprlist->get(i)->next != NULL;exprlist->popfirst()) {
 				iterexpr.addlast(exprlist->get(i)->item);
 			}
-			printstack(iterexpr);
+			printstack(initexpr);
 			// qLinkedList<item> cpcondexpr(condexpr);
 			// these statements divided suc.
 			fieldStatement(ln, S_FIELD_BEGIN);
@@ -1112,7 +1114,7 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 				assignStatement(ln, -998, RECOLIC_TEXT("1"));
 				debracket_process(&condexpr, ln);
 				rebracket_process(&condexpr, ln);
-				printstack(condexpr);
+				printstack(initexpr);
 				
 				fieldStatement(ln,S_FIELD_BEGIN);
 				if(condexpr.first->item.type==TYPE_OPERAND){
@@ -1126,8 +1128,12 @@ void rcalc(qLinkedList<item> *exprlist, int ln) {
 			else {
 				if(initexpr.popable()){
 					for(int i=0;initexpr.get(i)!=NULL;i++){
-						if(initexpr.get(i)->item.type==TYPE_OPERAND_VAR)
-							defineStatement(ln, initexpr.get(i)->item.number);
+						if(initexpr.first->item.type==TYPE_OPER && initexpr.first->item.oper=='D' && initexpr.get(i)->item.type==TYPE_OPERAND_VAR){
+							if(initexpr.get(i+1)!=NULL && initexpr.get(i+1)->item.type==TYPE_OPER && initexpr.get(i+1)->item.oper=='='){
+								//printf(RECOLIC_TEXT("DEFINE!\n"));
+								defineStatement(ln, initexpr.get(i)->item.number);
+							}
+						}
 					}
 					initexpr.popfirst();
 					printstack(initexpr);
