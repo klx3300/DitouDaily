@@ -101,6 +101,7 @@ int Calc(deque<statement>::iterator &now_it)
 				if((*now_it_tmp).cmdType==S_GOTO_DEST&&Loc_fieldCnt==fieldCnt)
 				{
 					now_it=now_it_tmp;
+                    fieldCnt=Loc_fieldCnt;
                     //puts("");
 					break;
 				}
