@@ -14,6 +14,7 @@
 #include "stdafx_.hpp"
 #include "analyser.hpp"
 #include "processor.hpp"
+#define system(x); ;
 
 #define FRM_ERROR(error_code) { cout << "\nSoftware exception occurred at recolic_main():Error code is " << error_code << endl; system("pause"); return error_code; }
 #define FRM_ERROR_(error_code) { cout << "\nSoftware exception occurred at recolic_main.cpp:Error code is " << error_code << endl; system("pause"); exit(error_code); }
